@@ -1,7 +1,7 @@
 ﻿/**
  * Window.cs
  * 
- * Thunder Aerospace Corporation's Atomic Clock for the Kerbal Space Program, by Taranis Elsu
+ * Thunder Aerospace Corporation's library for the Kerbal Space Program, by Taranis Elsu
  * 
  * (C) Copyright 2013, Taranis Elsu
  * 
