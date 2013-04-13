@@ -79,7 +79,7 @@ abstract class Window
 
     public virtual void Load(ConfigNode config, string subnode)
     {
-        Debug.Log("TAC Atomic Clock [" + Time.time + "]: Load " + subnode);
+        Debug.Log("TAC Window [" + Time.time + "]: Load " + subnode);
         if (config.HasNode(subnode))
         {
             ConfigNode windowConfig = config.GetNode(subnode);
@@ -99,7 +99,7 @@ abstract class Window
 
     public virtual void Save(ConfigNode config, string subnode)
     {
-        Debug.Log("TAC Atomic Clock [" + Time.time + "]: Save " + subnode);
+        Debug.Log("TAC Window [" + Time.time + "]: Save " + subnode);
 
         ConfigNode windowConfig;
         if (config.HasNode(subnode))
@@ -120,7 +120,7 @@ abstract class Window
     {
         try
         {
-            if (partModule.part.State != PartStates.DEAD && partModule.vessel.isActiveVessel)
+            if (partModule == null || (partModule.part.State != PartStates.DEAD && partModule.vessel.isActiveVessel))
             {
                 GUI.skin = HighLogic.Skin;
                 windowPos = GUILayout.Window(windowId, windowPos, Draw, windowTitle, GUILayout.ExpandWidth(true), GUILayout.ExpandHeight(true));
