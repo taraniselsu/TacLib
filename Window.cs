@@ -36,13 +36,11 @@ abstract class Window
     private bool visible = false;
     private Rect windowPos = new Rect(60, 60, 60, 60);
     private string windowTitle;
-    private PartModule partModule;
     private int windowId;
 
-    protected Window(string windowTitle, PartModule partModule)
+    protected Window(string windowTitle)
     {
         this.windowTitle = windowTitle;
-        this.partModule = partModule;
         this.windowId = windowTitle.GetHashCode() + new System.Random().Next(65536);
     }
 
@@ -53,21 +51,6 @@ abstract class Window
 
     public virtual void SetVisible(bool newValue)
     {
-        if (newValue)
-        {
-            if (!visible)
-            {
-                RenderingManager.AddToPostDrawQueue(3, new Callback(CreateWindow));
-            }
-        }
-        else
-        {
-            if (visible)
-            {
-                RenderingManager.RemoveFromPostDrawQueue(3, new Callback(CreateWindow));
-            }
-        }
-
         this.visible = newValue;
     }
 
@@ -79,28 +62,31 @@ abstract class Window
 
     public virtual void Load(ConfigNode config, string subnode)
     {
-        Debug.Log("TAC Window [" + Time.time + "]: Load " + subnode);
         if (config.HasNode(subnode))
         {
             ConfigNode windowConfig = config.GetNode(subnode);
 
-            float newValue;
-            if (windowConfig.HasValue("xPos") && float.TryParse(windowConfig.GetValue("xPos"), out newValue))
+            bool newBool;
+            if (windowConfig.HasValue("visible") && bool.TryParse(windowConfig.GetValue("visible"), out newBool))
             {
-                windowPos.xMin = newValue;
+                visible = newBool;
             }
 
-            if (windowConfig.HasValue("yPos") && float.TryParse(windowConfig.GetValue("yPos"), out newValue))
+            float newFloat;
+            if (windowConfig.HasValue("xPos") && float.TryParse(windowConfig.GetValue("xPos"), out newFloat))
             {
-                windowPos.yMin = newValue;
+                windowPos.xMin = newFloat;
+            }
+
+            if (windowConfig.HasValue("yPos") && float.TryParse(windowConfig.GetValue("yPos"), out newFloat))
+            {
+                windowPos.yMin = newFloat;
             }
         }
     }
 
     public virtual void Save(ConfigNode config, string subnode)
     {
-        Debug.Log("TAC Window [" + Time.time + "]: Save " + subnode);
-
         ConfigNode windowConfig;
         if (config.HasNode(subnode))
         {
@@ -112,27 +98,17 @@ abstract class Window
             config.AddNode(windowConfig);
         }
 
+        windowConfig.AddValue("visible", visible);
         windowConfig.AddValue("xPos", windowPos.xMin);
         windowConfig.AddValue("yPos", windowPos.yMin);
     }
 
-    protected virtual void CreateWindow()
+    public void OnGUI()
     {
-        try
+        if (visible)
         {
-            if (partModule == null || (partModule.part.State != PartStates.DEAD && partModule.vessel.isActiveVessel))
-            {
-                GUI.skin = HighLogic.Skin;
-                windowPos = GUILayout.Window(windowId, windowPos, Draw, windowTitle, GUILayout.ExpandWidth(true), GUILayout.ExpandHeight(true));
-            }
-            else
-            {
-                SetVisible(false);
-            }
-        }
-        catch
-        {
-            SetVisible(false);
+            GUI.skin = HighLogic.Skin;
+            windowPos = GUILayout.Window(windowId, windowPos, Draw, windowTitle, GUILayout.ExpandWidth(true), GUILayout.ExpandHeight(true));
         }
     }
 
