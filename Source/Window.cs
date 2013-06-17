@@ -51,6 +51,21 @@ abstract class Window
 
     public virtual void SetVisible(bool newValue)
     {
+        if (newValue)
+        {
+            if (!visible)
+            {
+                RenderingManager.AddToPostDrawQueue(3, new Callback(CreateWindow));
+            }
+        }
+        else
+        {
+            if (visible)
+            {
+                RenderingManager.RemoveFromPostDrawQueue(3, new Callback(CreateWindow));
+            }
+        }
+
         this.visible = newValue;
     }
 
@@ -103,9 +118,20 @@ abstract class Window
         windowConfig.AddValue("yPos", windowPos.yMin);
     }
 
-    public void OnGUI()
+    protected virtual void CreateWindow()
     {
-        if (visible)
+        bool paused;
+        try
+        {
+            paused = PauseMenu.isOpen;
+        }
+        catch (Exception)
+        {
+            // assume it is not open
+            paused = false;
+        }
+
+        if (visible && !paused)
         {
             GUI.skin = HighLogic.Skin;
             windowPos = GUILayout.Window(windowId, windowPos, Draw, windowTitle, GUILayout.ExpandWidth(true), GUILayout.ExpandHeight(true));
