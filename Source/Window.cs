@@ -40,7 +40,6 @@ namespace Tac
         private int windowId;
         private string configNodeName;
         private Rect windowPos;
-        private Vector2 scrollPosition;
         private bool windowMouseDown;
         private bool visible;
 
@@ -55,7 +54,6 @@ namespace Tac
             configNodeName = windowTitle.Replace(" ", "");
 
             windowPos = new Rect(60, 60, 60, 60);
-            scrollPosition = Vector2.zero;
             windowMouseDown = false;
             visible = false;
 
@@ -105,11 +103,13 @@ namespace Tac
             {
                 ConfigNode windowConfig = config.GetNode(configNodeName);
 
-                visible = Utilities.GetValue(windowConfig, "visible", visible);
                 windowPos.x = Utilities.GetValue(windowConfig, "x", windowPos.x);
                 windowPos.y = Utilities.GetValue(windowConfig, "y", windowPos.y);
                 windowPos.width = Utilities.GetValue(windowConfig, "width", windowPos.width);
                 windowPos.height = Utilities.GetValue(windowConfig, "height", windowPos.height);
+
+                bool newValue = Utilities.GetValue(windowConfig, "visible", visible);
+                SetVisible(newValue);
             }
         }
 
@@ -172,17 +172,10 @@ namespace Tac
 
         private void PreDrawWindowContents(int windowId)
         {
-            GUILayout.BeginVertical();
-            scrollPosition = GUILayout.BeginScrollView(scrollPosition);
-
             DrawWindowContents(windowId);
-
-            GUILayout.EndScrollView();
 
             var resizeRect = new Rect(windowPos.width - 16, windowPos.height - 16, 16, 16);
             GUI.Label(resizeRect, resizeContent, resizeStyle);
-
-            GUILayout.EndVertical();
 
             HandleWindowEvents(resizeRect);
 
