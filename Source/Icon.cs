@@ -33,12 +33,20 @@ namespace Tac
         {
             if (newValue)
             {
-                RenderingManager.AddToPostDrawQueue(3, DrawIcon);
+                if (!visible)
+                {
+                    RenderingManager.AddToPostDrawQueue(3, DrawIcon);
+                }
             }
             else
             {
-                RenderingManager.RemoveFromPostDrawQueue(3, DrawIcon);
+                if (visible)
+                {
+                    RenderingManager.RemoveFromPostDrawQueue(3, DrawIcon);
+                }
             }
+
+            this.visible = newValue;
         }
 
         public bool IsVisible()

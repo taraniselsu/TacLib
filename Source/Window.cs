@@ -25,118 +25,194 @@
  * is purely coincidental.
  */
 
+using KSP.IO;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
 
-abstract class Window
+namespace Tac
 {
-    private bool visible = false;
-    private Rect windowPos = new Rect(60, 60, 60, 60);
-    private string windowTitle;
-    private int windowId;
-
-    protected Window(string windowTitle)
+    abstract class Window<T>
     {
-        this.windowTitle = windowTitle;
-        this.windowId = windowTitle.GetHashCode() + new System.Random().Next(65536);
-    }
+        private string windowTitle;
+        private int windowId;
+        private string configNodeName;
+        private Rect windowPos;
+        private Vector2 scrollPosition;
+        private bool windowMouseDown;
+        private bool visible;
 
-    public bool IsVisible()
-    {
-        return visible;
-    }
+        private GUIStyle resizeStyle;
+        private GUIContent resizeContent;
 
-    public virtual void SetVisible(bool newValue)
-    {
-        if (newValue)
+        protected Window(string windowTitle)
         {
-            if (!visible)
+            this.windowTitle = windowTitle;
+            this.windowId = windowTitle.GetHashCode() + new System.Random().Next(65536);
+
+            configNodeName = windowTitle.Replace(" ", "");
+
+            windowPos = new Rect(60, 60, 60, 60);
+            scrollPosition = Vector2.zero;
+            windowMouseDown = false;
+            visible = false;
+
+            var texture = Utilities.LoadImage<T>(IOUtils.GetFilePathFor(typeof(T), "resize.png"));
+            resizeContent = (texture != null) ? new GUIContent(texture, "Drag to resize the window.") : new GUIContent("R", "Drag to resize the window.");
+        }
+
+        public bool IsVisible()
+        {
+            return visible;
+        }
+
+        public virtual void SetVisible(bool newValue)
+        {
+            if (newValue)
             {
-                RenderingManager.AddToPostDrawQueue(3, new Callback(CreateWindow));
+                if (!visible)
+                {
+                    RenderingManager.AddToPostDrawQueue(3, new Callback(DrawWindow));
+                }
+            }
+            else
+            {
+                if (visible)
+                {
+                    RenderingManager.RemoveFromPostDrawQueue(3, new Callback(DrawWindow));
+                }
+            }
+
+            this.visible = newValue;
+        }
+
+        public void ToggleVisible()
+        {
+            SetVisible(!visible);
+        }
+
+        public void SetSize(int width, int height)
+        {
+            windowPos.width = width;
+            windowPos.height = height;
+        }
+
+        public virtual void Load(ConfigNode config)
+        {
+            if (config.HasNode(configNodeName))
+            {
+                ConfigNode windowConfig = config.GetNode(configNodeName);
+
+                visible = Utilities.GetValue(windowConfig, "visible", visible);
+                windowPos.x = Utilities.GetValue(windowConfig, "x", windowPos.x);
+                windowPos.y = Utilities.GetValue(windowConfig, "y", windowPos.y);
+                windowPos.width = Utilities.GetValue(windowConfig, "width", windowPos.width);
+                windowPos.height = Utilities.GetValue(windowConfig, "height", windowPos.height);
             }
         }
-        else
+
+        public virtual void Save(ConfigNode config)
+        {
+            ConfigNode windowConfig;
+            if (config.HasNode(configNodeName))
+            {
+                windowConfig = config.GetNode(configNodeName);
+            }
+            else
+            {
+                windowConfig = new ConfigNode(configNodeName);
+                config.AddNode(windowConfig);
+            }
+
+            windowConfig.AddValue("visible", visible);
+            windowConfig.AddValue("x", windowPos.x);
+            windowConfig.AddValue("y", windowPos.y);
+            windowConfig.AddValue("width", windowPos.width);
+            windowConfig.AddValue("height", windowPos.height);
+        }
+
+        protected virtual void DrawWindow()
         {
             if (visible)
             {
-                RenderingManager.RemoveFromPostDrawQueue(3, new Callback(CreateWindow));
+                bool paused;
+                try
+                {
+                    paused = PauseMenu.isOpen;
+                }
+                catch (Exception)
+                {
+                    // assume the pause menu is not open
+                    paused = false;
+                }
+
+                if (!paused)
+                {
+                    GUI.skin = HighLogic.Skin;
+                    ConfigureStyles();
+
+                    windowPos = Utilities.EnsureVisible(windowPos);
+                    windowPos = GUILayout.Window(windowId, windowPos, PreDrawWindowContents, windowTitle, GUILayout.ExpandWidth(true),
+                        GUILayout.ExpandHeight(true), GUILayout.MinWidth(64), GUILayout.MinHeight(64));
+                }
             }
         }
 
-        this.visible = newValue;
-    }
-
-    public void SetSize(int width, int height)
-    {
-        windowPos.width = width;
-        windowPos.height = height;
-    }
-
-    public virtual void Load(ConfigNode config, string subnode)
-    {
-        if (config.HasNode(subnode))
+        protected virtual void ConfigureStyles()
         {
-            ConfigNode windowConfig = config.GetNode(subnode);
-
-            bool newBool;
-            if (windowConfig.HasValue("visible") && bool.TryParse(windowConfig.GetValue("visible"), out newBool))
+            if (resizeStyle == null)
             {
-                visible = newBool;
+                resizeStyle = new GUIStyle(GUI.skin.button);
+                resizeStyle.alignment = TextAnchor.MiddleCenter;
+                resizeStyle.padding = new RectOffset(1, 1, 1, 1);
             }
+        }
 
-            float newFloat;
-            if (windowConfig.HasValue("xPos") && float.TryParse(windowConfig.GetValue("xPos"), out newFloat))
+        private void PreDrawWindowContents(int windowId)
+        {
+            GUILayout.BeginVertical();
+            scrollPosition = GUILayout.BeginScrollView(scrollPosition);
+
+            DrawWindowContents(windowId);
+
+            GUILayout.EndScrollView();
+
+            var resizeRect = new Rect(windowPos.width - 16, windowPos.height - 16, 16, 16);
+            GUI.Label(resizeRect, resizeContent, resizeStyle);
+
+            GUILayout.EndVertical();
+
+            HandleWindowEvents(resizeRect);
+
+            GUI.DragWindow();
+        }
+
+        protected abstract void DrawWindowContents(int windowId);
+
+        private void HandleWindowEvents(Rect resizeRect)
+        {
+            var theEvent = Event.current;
+            if (theEvent != null)
             {
-                windowPos.xMin = newFloat;
+                if (theEvent.type == EventType.MouseDown && !windowMouseDown && theEvent.button == 0 && resizeRect.Contains(theEvent.mousePosition))
+                {
+                    windowMouseDown = true;
+                    theEvent.Use();
+                }
+                else if (theEvent.type == EventType.MouseDrag && windowMouseDown && theEvent.button == 0)
+                {
+                    windowPos.width += theEvent.delta.x;
+                    windowPos.height += theEvent.delta.y;
+                    theEvent.Use();
+                }
+                else if (theEvent.type == EventType.MouseUp && windowMouseDown && theEvent.button == 0)
+                {
+                    windowMouseDown = false;
+                    theEvent.Use();
+                }
             }
-
-            if (windowConfig.HasValue("yPos") && float.TryParse(windowConfig.GetValue("yPos"), out newFloat))
-            {
-                windowPos.yMin = newFloat;
-            }
         }
     }
-
-    public virtual void Save(ConfigNode config, string subnode)
-    {
-        ConfigNode windowConfig;
-        if (config.HasNode(subnode))
-        {
-            windowConfig = config.GetNode(subnode);
-        }
-        else
-        {
-            windowConfig = new ConfigNode(subnode);
-            config.AddNode(windowConfig);
-        }
-
-        windowConfig.AddValue("visible", visible);
-        windowConfig.AddValue("xPos", windowPos.xMin);
-        windowConfig.AddValue("yPos", windowPos.yMin);
-    }
-
-    protected virtual void CreateWindow()
-    {
-        bool paused;
-        try
-        {
-            paused = PauseMenu.isOpen;
-        }
-        catch (Exception)
-        {
-            // assume it is not open
-            paused = false;
-        }
-
-        if (visible && !paused)
-        {
-            GUI.skin = HighLogic.Skin;
-            windowPos = GUILayout.Window(windowId, windowPos, Draw, windowTitle, GUILayout.ExpandWidth(true), GUILayout.ExpandHeight(true));
-        }
-    }
-
-    protected abstract void Draw(int windowID);
 }

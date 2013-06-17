@@ -73,6 +73,19 @@ namespace Tac
             }
         }
 
+        public static bool GetValue(ConfigNode config, string name, bool currentValue)
+        {
+            bool newBool;
+            if (config.HasValue(name) && bool.TryParse(config.GetValue(name), out newBool))
+            {
+                return newBool;
+            }
+            else
+            {
+                return currentValue;
+            }
+        }
+
         public static float GetValue(ConfigNode config, string name, float currentValue)
         {
             float newFloat;
