@@ -1,4 +1,5 @@
-﻿using System;
+﻿using KSP.IO;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -24,7 +25,7 @@ namespace Tac
             this.iconPos = defaultPosition;
             this.onClick = onClickHandler;
 
-            var texture = Utilities.LoadImage<T>(imageFilename);
+            var texture = Utilities.LoadImage<T>(IOUtils.GetFilePathFor(typeof(T), imageFilename));
             content = (texture != null) ? new GUIContent(texture, tooltip) : new GUIContent("?", tooltip);
         }
 
