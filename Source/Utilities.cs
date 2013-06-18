@@ -102,10 +102,10 @@ namespace Tac
 
         public static bool GetValue(ConfigNode config, string name, bool currentValue)
         {
-            bool newBool;
-            if (config.HasValue(name) && bool.TryParse(config.GetValue(name), out newBool))
+            bool newValue;
+            if (config.HasValue(name) && bool.TryParse(config.GetValue(name), out newValue))
             {
-                return newBool;
+                return newValue;
             }
             else
             {
@@ -115,10 +115,23 @@ namespace Tac
 
         public static float GetValue(ConfigNode config, string name, float currentValue)
         {
-            float newFloat;
-            if (config.HasValue(name) && float.TryParse(config.GetValue(name), out newFloat))
+            float newValue;
+            if (config.HasValue(name) && float.TryParse(config.GetValue(name), out newValue))
             {
-                return newFloat;
+                return newValue;
+            }
+            else
+            {
+                return currentValue;
+            }
+        }
+
+        public static double GetValue(ConfigNode config, string name, double currentValue)
+        {
+            double newValue;
+            if (config.HasValue(name) && double.TryParse(config.GetValue(name), out newValue))
+            {
+                return newValue;
             }
             else
             {
