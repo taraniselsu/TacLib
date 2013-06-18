@@ -39,10 +39,11 @@ namespace Tac
         private string windowTitle;
         private int windowId;
         private string configNodeName;
-        private Rect windowPos;
+        protected Rect windowPos;
         private bool windowMouseDown;
         private bool visible;
 
+        protected GUIStyle closeButtonStyle;
         private GUIStyle resizeStyle;
         private GUIContent resizeContent;
 
@@ -162,8 +163,15 @@ namespace Tac
 
         protected virtual void ConfigureStyles()
         {
-            if (resizeStyle == null)
+            if (closeButtonStyle == null)
             {
+                closeButtonStyle = new GUIStyle(GUI.skin.button);
+                closeButtonStyle.padding = new RectOffset(5, 5, 3, 0);
+                closeButtonStyle.margin = new RectOffset(1, 1, 1, 1);
+                closeButtonStyle.stretchWidth = false;
+                closeButtonStyle.stretchHeight = false;
+                closeButtonStyle.alignment = TextAnchor.MiddleCenter;
+
                 resizeStyle = new GUIStyle(GUI.skin.button);
                 resizeStyle.alignment = TextAnchor.MiddleCenter;
                 resizeStyle.padding = new RectOffset(1, 1, 1, 1);
@@ -173,6 +181,11 @@ namespace Tac
         private void PreDrawWindowContents(int windowId)
         {
             DrawWindowContents(windowId);
+
+            if (GUI.Button(new Rect(windowPos.width - 24, 4, 20, 20), "X", closeButtonStyle))
+            {
+                SetVisible(false);
+            }
 
             var resizeRect = new Rect(windowPos.width - 16, windowPos.height - 16, 16, 16);
             GUI.Label(resizeRect, resizeContent, resizeStyle);
