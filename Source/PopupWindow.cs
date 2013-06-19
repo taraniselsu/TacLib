@@ -34,6 +34,7 @@ namespace Tac
             if (showPopup)
             {
                 GUI.skin = HighLogic.Skin;
+                popupPos = Utilities.EnsureCompletelyVisible(popupPos);
                 popupPos = GUILayout.Window(windowId, popupPos, DrawPopupContents, "");
             }
         }
@@ -52,15 +53,24 @@ namespace Tac
 
         public static void Draw(string buttonText, Rect windowPos, Action<int> popupDrawCallback)
         {
+            Draw(buttonText, windowPos, popupDrawCallback, GUI.skin.button);
+        }
+
+        public static void Draw(string buttonText, Rect windowPos, Action<int> popupDrawCallback, GUIStyle buttonStyle)
+        {
             PopupWindow pw = PopupWindow.GetInstance();
 
             var content = new GUIContent(buttonText);
-            var rect = GUILayoutUtility.GetRect(content, GUI.skin.button);
-            if (GUI.Button(rect, content))
+            var rect = GUILayoutUtility.GetRect(content, buttonStyle);
+            if (GUI.Button(rect, content, buttonStyle))
             {
                 pw.showPopup = true;
+
                 // pw.popupPos = new Rect(windowPos.x + rect.xMin, windowPos.y + rect.yMax + 1, 10, 10);
-                pw.popupPos = new Rect(windowPos.x + 40, windowPos.y + 40, 10, 10);
+                // pw.popupPos = new Rect(windowPos.x + 40, windowPos.y + 40, 10, 10);
+                var mouse = Input.mousePosition;
+                pw.popupPos = new Rect(mouse.x - 10, Screen.height - mouse.y + 10, 10, 10);
+
                 pw.callback = popupDrawCallback;
             }
 
