@@ -142,5 +142,19 @@ namespace Tac
                 return currentValue;
             }
         }
+
+        public static double ShowTextField(double currentValue, int maxLength, GUIStyle style, params GUILayoutOption[] options)
+        {
+            double newDouble;
+            string result = GUILayout.TextField(currentValue.ToString(), maxLength, style, options);
+            if (double.TryParse(result, out newDouble))
+            {
+                return newDouble;
+            }
+            else
+            {
+                return currentValue;
+            }
+        }
     }
 }
