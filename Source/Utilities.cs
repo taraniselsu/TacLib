@@ -38,22 +38,13 @@ namespace Tac
     {
         public static Rect EnsureVisible(Rect pos, float min = 16.0f)
         {
-            if ((pos.x + pos.width) < min)
-            {
-                pos.x = min - pos.width;
-            }
-            if (pos.x > (Screen.width - min))
-            {
-                pos.x = Screen.width - min;
-            }
-            if ((pos.y + pos.height) < min)
-            {
-                pos.y = min - pos.height;
-            }
-            if (pos.y > (Screen.height - min))
-            {
-                pos.y = Screen.height - min;
-            }
+            float xMin = min - pos.width;
+            float xMax = Screen.width - min;
+            float yMin = min - pos.height;
+            float yMax = Screen.height - min;
+
+            pos.x = Mathf.Clamp(pos.x, xMin, xMax);
+            pos.y = Mathf.Clamp(pos.y, yMin, yMax);
 
             return pos;
         }
