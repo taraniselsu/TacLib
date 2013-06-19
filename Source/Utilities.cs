@@ -49,6 +49,19 @@ namespace Tac
             return pos;
         }
 
+        public static Rect EnsureCompletelyVisible(Rect pos)
+        {
+            float xMin = 0;
+            float xMax = Screen.width - pos.width;
+            float yMin = 0;
+            float yMax = Screen.height - pos.height;
+
+            pos.x = Mathf.Clamp(pos.x, xMin, xMax);
+            pos.y = Mathf.Clamp(pos.y, yMin, yMax);
+
+            return pos;
+        }
+
         public static Rect ClampToScreenEdge(Rect pos)
         {
             float topSeparation = Math.Abs(pos.y);
