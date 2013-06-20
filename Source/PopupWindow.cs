@@ -10,7 +10,8 @@ namespace Tac
         private int windowId;
         private bool showPopup;
         private Rect popupPos;
-        private Action<int> callback;
+        private Func<int, object, bool> callback;
+        private object parameter;
 
         private static PopupWindow GetInstance()
         {
@@ -43,35 +44,30 @@ namespace Tac
         {
             GUI.BringWindowToFront(windowId);
 
-            if (Event.current.rawType == EventType.MouseUp)
+            bool shouldClose = callback(windowId, parameter);
+
+            if (shouldClose)
             {
                 showPopup = false;
             }
-
-            callback(windowId);
         }
 
-        public static void Draw(string buttonText, Rect windowPos, Action<int> popupDrawCallback)
-        {
-            Draw(buttonText, windowPos, popupDrawCallback, GUI.skin.button);
-        }
-
-        public static void Draw(string buttonText, Rect windowPos, Action<int> popupDrawCallback, GUIStyle buttonStyle)
+        public static void Draw(string buttonText, Rect windowPos, Func<int, object, bool> popupDrawCallback, GUIStyle buttonStyle, object parameter, params GUILayoutOption[] options)
         {
             PopupWindow pw = PopupWindow.GetInstance();
 
             var content = new GUIContent(buttonText);
-            var rect = GUILayoutUtility.GetRect(content, buttonStyle);
+            var rect = GUILayoutUtility.GetRect(content, buttonStyle, options);
             if (GUI.Button(rect, content, buttonStyle))
             {
                 pw.showPopup = true;
 
                 // pw.popupPos = new Rect(windowPos.x + rect.xMin, windowPos.y + rect.yMax + 1, 10, 10);
-                // pw.popupPos = new Rect(windowPos.x + 40, windowPos.y + 40, 10, 10);
                 var mouse = Input.mousePosition;
-                pw.popupPos = new Rect(mouse.x - 10, Screen.height - mouse.y + 10, 10, 10);
+                pw.popupPos = new Rect(mouse.x - 10, Screen.height - mouse.y - 10, 10, 10);
 
                 pw.callback = popupDrawCallback;
+                pw.parameter = parameter;
             }
 
             if (Event.current.rawType == EventType.MouseUp)
