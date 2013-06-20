@@ -138,15 +138,17 @@ namespace Tac
         {
             if (visible)
             {
-                bool paused;
-                try
+                bool paused = false;
+                if (HighLogic.LoadedSceneIsFlight)
                 {
-                    paused = PauseMenu.isOpen;
-                }
-                catch (Exception)
-                {
-                    // assume the pause menu is not open
-                    paused = false;
+                    try
+                    {
+                        paused = PauseMenu.isOpen || FlightResultsDialog.isDisplaying;
+                    }
+                    catch (Exception)
+                    {
+                        // ignore the error and assume the pause menu is not open
+                    }
                 }
 
                 if (!paused)
