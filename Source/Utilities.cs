@@ -143,6 +143,18 @@ namespace Tac
             }
         }
 
+        public static string GetValue(ConfigNode config, string name, string currentValue)
+        {
+            if (config.HasValue(name))
+            {
+                return config.GetValue(name);
+            }
+            else
+            {
+                return currentValue;
+            }
+        }
+
         public static double ShowTextField(double currentValue, int maxLength, GUIStyle style, params GUILayoutOption[] options)
         {
             double newDouble;
