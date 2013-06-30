@@ -45,7 +45,7 @@ namespace Tac
         private GUIStyle iconStyle;
         private bool visible = false;
 
-        public Icon(Rect defaultPosition, string imageFilename, string tooltip, Action onClickHandler)
+        public Icon(Rect defaultPosition, string imageFilename, string noImageText, string tooltip, Action onClickHandler)
         {
             Debug.Log("TAC Icon [" + this.GetHashCode().ToString("X") + "][" + Time.time + "]: Constructor: " + imageFilename);
             this.iconId = imageFilename.GetHashCode();
@@ -53,7 +53,7 @@ namespace Tac
             this.onClick = onClickHandler;
 
             var texture = Utilities.LoadImage<T>(IOUtils.GetFilePathFor(typeof(T), imageFilename));
-            content = (texture != null) ? new GUIContent(texture, tooltip) : new GUIContent("?", tooltip);
+            content = (texture != null) ? new GUIContent(texture, tooltip) : new GUIContent(noImageText, tooltip);
         }
 
         public void SetVisible(bool newValue)
