@@ -47,14 +47,14 @@ namespace Tac
         private GUIStyle resizeStyle;
         private GUIContent resizeContent;
 
-        protected Window(string windowTitle)
+        protected Window(string windowTitle, float defaultWidth, float defaultHeight)
         {
             this.windowTitle = windowTitle;
             this.windowId = windowTitle.GetHashCode() + new System.Random().Next(65536);
 
             configNodeName = windowTitle.Replace(" ", "");
 
-            windowPos = new Rect(60, 60, 60, 60);
+            windowPos = new Rect((Screen.width - defaultWidth) / 2, (Screen.height - defaultHeight) / 2, defaultWidth, defaultHeight);
             windowMouseDown = false;
             visible = false;
 
