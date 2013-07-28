@@ -182,5 +182,39 @@ namespace Tac
                 return currentValue;
             }
         }
+
+        public static string FormatTime(double time)
+        {
+            const int SECONDS_PER_MINUTE = 60;
+            const int SECONDS_PER_HOUR = 3600;
+            const int SECONDS_PER_DAY = 24 * SECONDS_PER_HOUR;
+
+            time = (int)time;
+
+            string result = "";
+            if (time < 0)
+            {
+                result += "-";
+                time = -time;
+            }
+
+            int days = (int)(time / SECONDS_PER_DAY);
+            time -= days * SECONDS_PER_DAY;
+
+            int hours = (int)(time / SECONDS_PER_HOUR);
+            time -= hours * SECONDS_PER_HOUR;
+
+            int minutes = (int)(time / SECONDS_PER_MINUTE);
+            time -= minutes * SECONDS_PER_MINUTE;
+
+            int seconds = (int)time;
+
+            if (days > 0)
+            {
+                result += days.ToString("#0") + ":";
+            }
+            result += hours.ToString("00") + ":" + minutes.ToString("00") + ":" + seconds.ToString("00");
+            return result;
+        }
     }
 }
