@@ -157,11 +157,25 @@ namespace Tac
 
         public static double ShowTextField(double currentValue, int maxLength, GUIStyle style, params GUILayoutOption[] options)
         {
-            double newDouble;
+            double newValue;
             string result = GUILayout.TextField(currentValue.ToString(), maxLength, style, options);
-            if (double.TryParse(result, out newDouble))
+            if (double.TryParse(result, out newValue))
             {
-                return newDouble;
+                return newValue;
+            }
+            else
+            {
+                return currentValue;
+            }
+        }
+
+        public static float ShowTextField(float currentValue, int maxLength, GUIStyle style, params GUILayoutOption[] options)
+        {
+            float newValue;
+            string result = GUILayout.TextField(currentValue.ToString(), maxLength, style, options);
+            if (float.TryParse(result, out newValue))
+            {
+                return newValue;
             }
             else
             {
