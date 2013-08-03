@@ -34,7 +34,7 @@ using UnityEngine;
 
 namespace Tac
 {
-    abstract class Window<T>
+    public abstract class Window<T>
     {
         private string windowTitle;
         private int windowId;
