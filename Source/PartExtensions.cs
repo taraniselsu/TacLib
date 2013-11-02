@@ -175,7 +175,7 @@ namespace Tac
                 // of an equal amount from each part?
                 var allNonEmptyPartResources = allPartResources.Where(p => p.amount > 0.0 && p.flowMode != PartResource.FlowMode.In);
                 int count = allNonEmptyPartResources.Count();
-                while (leftOver > 0.0 && count > 0)
+                while (leftOver > 0.000000001 && count > 0)
                 {
                     double takeFromEach = leftOver / count;
                     foreach (PartResource partResource in allNonEmptyPartResources)
@@ -197,7 +197,7 @@ namespace Tac
 
                 var allNonFullPartResources = allPartResources.Where(p => (p.maxAmount - p.amount) > 0.0 && p.flowMode != PartResource.FlowMode.Out);
                 int count = allNonFullPartResources.Count();
-                while (leftOver > 0.0 && count > 0)
+                while (leftOver > 0.000000001 && count > 0)
                 {
                     double giveToEach = leftOver / count;
                     foreach (PartResource partResource in allNonFullPartResources)
@@ -266,7 +266,7 @@ namespace Tac
                 {
                     amountAvailable += partResource.amount;
 
-                    if (amountAvailable > demand)
+                    if (amountAvailable >= demand)
                     {
                         return demand;
                     }
@@ -283,7 +283,7 @@ namespace Tac
                 {
                     availableSpace += (partResource.maxAmount - partResource.amount);
 
-                    if (availableSpace > -demand)
+                    if (availableSpace >= -demand)
                     {
                         return demand;
                     }
