@@ -155,6 +155,25 @@ namespace Tac
             }
         }
 
+        public static double ShowTextField(string label, GUIStyle labelStyle, double currentValue, int maxLength, GUIStyle editStyle, params GUILayoutOption[] options)
+        {
+            GUILayout.BeginHorizontal();
+            GUILayout.Label(label, labelStyle);
+            GUILayout.FlexibleSpace();
+            string result = GUILayout.TextField(currentValue.ToString(), maxLength, editStyle, options);
+            GUILayout.EndHorizontal();
+
+            double newValue;
+            if (double.TryParse(result, out newValue))
+            {
+                return newValue;
+            }
+            else
+            {
+                return currentValue;
+            }
+        }
+
         public static double ShowTextField(double currentValue, int maxLength, GUIStyle style, params GUILayoutOption[] options)
         {
             double newValue;
@@ -181,6 +200,17 @@ namespace Tac
             {
                 return currentValue;
             }
+        }
+
+        public static bool ShowToggle(string label, GUIStyle labelStyle, bool currentValue)
+        {
+            GUILayout.BeginHorizontal();
+            GUILayout.Label(label, labelStyle);
+            GUILayout.FlexibleSpace();
+            bool result = GUILayout.Toggle(currentValue, "");
+            GUILayout.EndHorizontal();
+
+            return result;
         }
 
         public static string FormatTime(double time)

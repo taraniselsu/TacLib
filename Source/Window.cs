@@ -47,6 +47,8 @@ namespace Tac
         private GUIStyle resizeStyle;
         private GUIContent resizeContent;
 
+        public bool Resizable { get; set; }
+
         protected Window(string windowTitle, float defaultWidth, float defaultHeight)
         {
             this.windowTitle = windowTitle;
@@ -189,10 +191,13 @@ namespace Tac
                 SetVisible(false);
             }
 
-            var resizeRect = new Rect(windowPos.width - 16, windowPos.height - 16, 16, 16);
-            GUI.Label(resizeRect, resizeContent, resizeStyle);
+            if (Resizable)
+            {
+                var resizeRect = new Rect(windowPos.width - 16, windowPos.height - 16, 16, 16);
+                GUI.Label(resizeRect, resizeContent, resizeStyle);
 
-            HandleWindowEvents(resizeRect);
+                HandleWindowEvents(resizeRect);
+            }
 
             GUI.DragWindow();
         }
