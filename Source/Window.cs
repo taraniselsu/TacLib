@@ -62,6 +62,8 @@ namespace Tac
 
             var texture = Utilities.LoadImage<T>(IOUtils.GetFilePathFor(typeof(T), "resize.png"));
             resizeContent = (texture != null) ? new GUIContent(texture, "Drag to resize the window.") : new GUIContent("R", "Drag to resize the window.");
+
+            Resizable = true;
         }
 
         public bool IsVisible()
