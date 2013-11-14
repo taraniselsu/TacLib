@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(PROGRAMFILES)\MSBuild\ExtensionPack\4.0\MSBuild.ExtensionPack.VersionNumber.targets" Condition="Exists('$(PROGRAMFILES)\MSBuild\ExtensionPack\4.0\MSBuild.ExtensionPack.VersionNumber.targets')" />
+  <PropertyGroup>
+    <AssemblyBuildNumber>0</AssemblyBuildNumber>
+    <AssemblyRevision>0</AssemblyRevision>
+    <AssemblyBuildNumberType>NoIncrement</AssemblyBuildNumberType>
+    <AssemblyRevisionType>NoIncrement</AssemblyRevisionType>
+    <AssemblyFileBuildNumber>0</AssemblyFileBuildNumber>
+    <AssemblyFileRevision>0</AssemblyFileRevision>
+    <AssemblyFileBuildNumberType>Julian</AssemblyFileBuildNumberType>
+    <AssemblyFileRevisionType>AutoIncrement</AssemblyFileRevisionType>
+    <AssemblyFileRevisionFormat>0</AssemblyFileRevisionFormat>
+  </PropertyGroup>
+  <Target Name="GitInfo">
+    <!-- Get the current git SHA1 -->
+    <Exec Command="git log -1 --format='%%h'" ConsoleToMSBuild="true" EchoOff="true">
+      <Output TaskParameter="ConsoleOutput" PropertyName="GitSHA" />
+    </Exec>
+    <Message Text="Current Git SHA = $(GitSHA)" />
+
+    <!-- Check that the workspace matches the repository. -->
+    <Exec Command="git status -s | grep -v AssemblyInfo.cs" ConsoleToMSBuild="true" EchoOff="true" IgnoreExitCode="true">
+      <Output TaskParameter="ConsoleOutput" PropertyName="GitStatusCheck" />
+    </Exec>
+    <Warning Condition="$(GitStatusCheck) != ''" Text="Your workspace is not clean" />
+    <PropertyGroup>
+      <GitStatus Condition="$(GitStatusCheck) != ''">with modifications</GitStatus>
+      <GitStatus Condition="$(GitStatusCheck) == ''">clean</GitStatus>
+    </PropertyGroup>
+  </Target>
+  <Target Name="TacPostBuild">
+    <Message Text="Built version = $(MaxAssemblyFileVersion)" Importance="high" />
+    <!-- Copy the dll to the GameData directory -->
+    <MakeDir Directories="$(ProjectDir)\..\GameData\ThunderAerospace\$(ProjectName)\" />
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(ProjectDir)\..\GameData\ThunderAerospace\$(ProjectName)\" />
+    <!-- Write the version file -->
+    <ItemGroup>
+      <OldVersionFiles Include="$(ProjectDir)\..\GameData\ThunderAerospace\$(ProjectName)_*.txt" />
+    </ItemGroup>
+    <Delete Files="@(OldVersionFiles)" />
+    <WriteLinesToFile File="$(ProjectDir)\..\GameData\ThunderAerospace\$(ProjectName)_$(MaxAssemblyFileVersion).txt" Lines="You have installed the $(ProjectName), version $(MaxAssemblyFileVersion) ($(GitSHA) $(GitStatus)).&#xD;&#xA;&#xD;&#xA;See the Readme.txt and LICENSE.txt files for more information." Overwrite="true" Encoding="UTF-8" />
+    <!-- Copy to the test directory -->
+	<Warning Condition="'$(KSP_TEST)' == ''" Text="The environment variable KSP_TEST is not set!" />
+	<Exec Command="test.bat" WorkingDirectory="$(ProjectDir)\..\" IgnoreExitCode="true" />
+  </Target>
+</Project>
