@@ -124,11 +124,11 @@ namespace Tac
             if (config.HasNode(configNodeName))
             {
                 windowConfig = config.GetNode(configNodeName);
+                windowConfig.ClearData();
             }
             else
             {
-                windowConfig = new ConfigNode(configNodeName);
-                config.AddNode(windowConfig);
+                windowConfig = config.AddNode(configNodeName);
             }
 
             windowConfig.AddValue("visible", visible);

@@ -36,6 +36,7 @@ namespace Tac
 {
     public class Icon<T>
     {
+        private const string configNodeName = "Icon";
         private bool mouseDown = false;
         private bool mouseWasDragged = false;
         private int iconId;
@@ -90,18 +91,35 @@ namespace Tac
             HandleIconEvents();
         }
 
-        public void Load(ConfigNode config)
+        public void Load(ConfigNode node)
         {
-            iconPos.x = Utilities.GetValue(config, "icon.x", iconPos.x);
-            iconPos.y = Utilities.GetValue(config, "icon.y", iconPos.y);
-            iconPos = Utilities.EnsureVisible(iconPos, Math.Min(iconPos.width, iconPos.height));
-            iconPos = Utilities.ClampToScreenEdge(iconPos);
+            if (node.HasNode(configNodeName))
+            {
+                ConfigNode iconNode = node.GetNode(configNodeName);
+
+                iconPos.x = Utilities.GetValue(iconNode, "xPos", iconPos.x);
+                iconPos.y = Utilities.GetValue(iconNode, "yPos", iconPos.y);
+
+                iconPos = Utilities.EnsureVisible(iconPos, Math.Min(iconPos.width, iconPos.height));
+                iconPos = Utilities.ClampToScreenEdge(iconPos);
+            }
         }
 
-        public void Save(ConfigNode config)
+        public void Save(ConfigNode node)
         {
-            config.AddValue("icon.x", iconPos.x);
-            config.AddValue("icon.y", iconPos.y);
+            ConfigNode iconNode;
+            if (node.HasNode(configNodeName))
+            {
+                iconNode = node.GetNode(configNodeName);
+                iconNode.ClearData();
+            }
+            else
+            {
+                iconNode = node.AddNode(configNodeName);
+            }
+
+            iconNode.AddValue("xPos", iconPos.x);
+            iconNode.AddValue("yPos", iconPos.y);
         }
 
         private void ConfigureStyles()
