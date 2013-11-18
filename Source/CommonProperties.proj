@@ -52,7 +52,7 @@
       <OldVersionFiles Include="$(BaseDir)\GameData\ThunderAerospace\$(ProjectName)_*.txt" />
     </ItemGroup>
     <Delete Files="@(OldVersionFiles)" />
-    <WriteLinesToFile File="$(BaseDir)\GameData\ThunderAerospace\$(ProjectName)_$(MaxAssemblyFileVersion).txt" Lines="You have installed the $(ProjectName), version $(MaxAssemblyFileVersion) ($(GitSHA)+$(GitSHA2) $(GitStatus)).&#xD;&#xA;&#xD;&#xA;See the Readme.txt and LICENSE.txt files for more information." Overwrite="true" Encoding="UTF-8" />
+    <WriteLinesToFile File="$(BaseDir)\GameData\ThunderAerospace\$(ProjectName)_v$(MaxAssemblyFileVersion).txt" Lines="You have installed the $(ProjectName), version $(MaxAssemblyFileVersion) ($(GitSHA)+$(GitSHA2) $(GitStatus)).&#xD;&#xA;&#xD;&#xA;See the Readme.txt and LICENSE.txt files for more information." Overwrite="true" Encoding="UTF-8" />
     <!-- Copy to the test directory -->
     <Warning Condition="'$(KSP_TEST)' == ''" Text="The environment variable KSP_TEST is not set!" />
     <Exec Command="test.bat" WorkingDirectory="$(BaseDir)\" IgnoreExitCode="true" />
