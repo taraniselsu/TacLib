@@ -40,7 +40,7 @@ namespace Tac
         private int windowId;
         private string configNodeName;
         protected Rect windowPos;
-        private bool windowMouseDown;
+        private bool mouseDown;
         private bool visible;
 
         protected GUIStyle closeButtonStyle;
@@ -57,7 +57,7 @@ namespace Tac
             configNodeName = windowTitle.Replace(" ", "");
 
             windowPos = new Rect((Screen.width - defaultWidth) / 2, (Screen.height - defaultHeight) / 2, defaultWidth, defaultHeight);
-            windowMouseDown = false;
+            mouseDown = false;
             visible = false;
 
             var texture = Utilities.LoadImage<T>(IOUtils.GetFilePathFor(typeof(T), "resize.png"));
@@ -211,21 +211,28 @@ namespace Tac
             var theEvent = Event.current;
             if (theEvent != null)
             {
-                if (theEvent.type == EventType.MouseDown && !windowMouseDown && theEvent.button == 0 && resizeRect.Contains(theEvent.mousePosition))
+                if (!mouseDown)
                 {
-                    windowMouseDown = true;
-                    theEvent.Use();
+                    if (theEvent.type == EventType.MouseDown && theEvent.button == 0 && resizeRect.Contains(theEvent.mousePosition))
+                    {
+                        mouseDown = true;
+                        theEvent.Use();
+                    }
                 }
-                else if (theEvent.type == EventType.MouseDrag && windowMouseDown && theEvent.button == 0)
+                else if (theEvent.type != EventType.Layout)
                 {
-                    windowPos.width += theEvent.delta.x;
-                    windowPos.height += theEvent.delta.y;
-                    theEvent.Use();
-                }
-                else if (theEvent.type == EventType.MouseUp && windowMouseDown && theEvent.button == 0)
-                {
-                    windowMouseDown = false;
-                    theEvent.Use();
+                    if (Input.GetMouseButton(0))
+                    {
+                        // Flip the mouse Y so that 0 is at the top
+                        float mouseY = Screen.height - Input.mousePosition.y;
+
+                        windowPos.width = Mathf.Clamp(Input.mousePosition.x - windowPos.x + (resizeRect.width / 2), 50, Screen.width - windowPos.x);
+                        windowPos.height = Mathf.Clamp(mouseY - windowPos.y + (resizeRect.height / 2), 50, Screen.height - windowPos.y);
+                    }
+                    else
+                    {
+                        mouseDown = false;
+                    }
                 }
             }
         }

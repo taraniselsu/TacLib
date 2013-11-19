@@ -101,7 +101,6 @@ namespace Tac
                 iconPos.y = Utilities.GetValue(iconNode, "yPos", iconPos.y);
 
                 iconPos = Utilities.EnsureVisible(iconPos, Math.Min(iconPos.width, iconPos.height));
-                iconPos = Utilities.ClampToScreenEdge(iconPos);
             }
         }
 
@@ -137,34 +136,41 @@ namespace Tac
             var theEvent = Event.current;
             if (theEvent != null)
             {
-                if (theEvent.type == EventType.MouseDown && !mouseDown && theEvent.button == 0
-                    && iconPos.Contains(theEvent.mousePosition))
+                if (!mouseDown)
                 {
-                    mouseDown = true;
-                    theEvent.Use();
-                }
-                else if (theEvent.type == EventType.MouseDrag && mouseDown && theEvent.button == 0)
-                {
-                    mouseWasDragged = true;
-                    iconPos.x += theEvent.delta.x;
-                    iconPos.y += theEvent.delta.y;
-                    iconPos = Utilities.EnsureVisible(iconPos, Math.Min(iconPos.width, iconPos.height));
-                    theEvent.Use();
-                }
-                else if (theEvent.type == EventType.MouseUp && mouseDown && theEvent.button == 0)
-                {
-                    if (!mouseWasDragged)
+                    if (theEvent.type == EventType.MouseDown && theEvent.button == 0 && iconPos.Contains(theEvent.mousePosition))
                     {
-                        onClick();
+                        mouseDown = true;
+                        theEvent.Use();
+                    }
+                }
+                else if (theEvent.type != EventType.Layout)
+                {
+                    if (Input.GetMouseButton(0))
+                    {
+                        // Flip the mouse Y so that 0 is at the top
+                        float mouseY = Screen.height - Input.mousePosition.y;
+
+                        if (mouseWasDragged)
+                        {
+                            iconPos.x = Mathf.Clamp(Input.mousePosition.x - (iconPos.width / 2), 0, Screen.width - iconPos.width);
+                            iconPos.y = Mathf.Clamp(mouseY - (iconPos.height / 2), 0, Screen.height - iconPos.height);
+                        }
+                        else if (Mathf.Abs(iconPos.x - Input.mousePosition.x) > iconPos.width || Mathf.Abs(iconPos.y - mouseY) > iconPos.height)
+                        {
+                            mouseWasDragged = true;
+                        }
                     }
                     else
                     {
-                        iconPos = Utilities.ClampToScreenEdge(iconPos);
-                    }
+                        if (!mouseWasDragged)
+                        {
+                            onClick();
+                        }
 
-                    mouseDown = false;
-                    mouseWasDragged = false;
-                    theEvent.Use();
+                        mouseDown = false;
+                        mouseWasDragged = false;
+                    }
                 }
             }
         }
