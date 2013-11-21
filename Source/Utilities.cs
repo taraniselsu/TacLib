@@ -117,6 +117,19 @@ namespace Tac
             }
         }
 
+        public static int GetValue(ConfigNode config, string name, int currentValue)
+        {
+            int newValue;
+            if (config.HasValue(name) && int.TryParse(config.GetValue(name), out newValue))
+            {
+                return newValue;
+            }
+            else
+            {
+                return currentValue;
+            }
+        }
+
         public static float GetValue(ConfigNode config, string name, float currentValue)
         {
             float newValue;
@@ -153,6 +166,20 @@ namespace Tac
             {
                 return currentValue;
             }
+        }
+
+        public static T GetValue<T>(ConfigNode config, string name, T currentValue) where T : IComparable, IFormattable, IConvertible
+        {
+            if (config.HasValue(name))
+            {
+                string stringValue = config.GetValue(name);
+                if (Enum.IsDefined(typeof(T), stringValue))
+                {
+                    return (T)Enum.Parse(typeof(T), stringValue);
+                }
+            }
+
+            return currentValue;
         }
 
         public static double ShowTextField(string label, GUIStyle labelStyle, double currentValue, int maxLength, GUIStyle editStyle, params GUILayoutOption[] options)
