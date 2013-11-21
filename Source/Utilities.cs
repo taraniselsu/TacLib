@@ -34,7 +34,7 @@ using UnityEngine;
 
 namespace Tac
 {
-    public class Utilities
+    public static class Utilities
     {
         public static Rect EnsureVisible(Rect pos, float min = 16.0f)
         {
@@ -272,6 +272,16 @@ namespace Tac
             }
             result += hours.ToString("00") + ":" + minutes.ToString("00") + ":" + seconds.ToString("00");
             return result;
+        }
+
+        public static void Log(this UnityEngine.Object obj, String message)
+        {
+            Debug.Log(obj.GetType().FullName + "[" + obj.GetInstanceID().ToString("X") + "][" + Time.time.ToString("0.00") + "]: " + message);
+        }
+
+        public static void LogError(this UnityEngine.Object obj, String message)
+        {
+            Debug.LogError(obj.GetType().FullName + "[" + obj.GetInstanceID().ToString("X") + "][" + Time.time.ToString("0.00") + "]: " + message);
         }
     }
 }
