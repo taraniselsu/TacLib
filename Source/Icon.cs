@@ -48,7 +48,7 @@ namespace Tac
 
         public Icon(Rect defaultPosition, string imageFilename, string noImageText, string tooltip, Action onClickHandler)
         {
-            Debug.Log("TAC Icon [" + this.GetHashCode().ToString("X") + "][" + Time.time + "]: Constructor: " + imageFilename);
+            this.Log("Constructor: " + imageFilename);
             this.iconId = imageFilename.GetHashCode();
             this.iconPos = defaultPosition;
             this.onClick = onClickHandler;
