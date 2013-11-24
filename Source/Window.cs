@@ -48,6 +48,7 @@ namespace Tac
         private GUIContent resizeContent;
 
         public bool Resizable { get; set; }
+        public bool HideCloseButton { get; set; }
 
         protected Window(string windowTitle, float defaultWidth, float defaultHeight)
         {
@@ -64,6 +65,7 @@ namespace Tac
             resizeContent = (texture != null) ? new GUIContent(texture, "Drag to resize the window.") : new GUIContent("R", "Drag to resize the window.");
 
             Resizable = true;
+            HideCloseButton = false;
         }
 
         public bool IsVisible()
@@ -188,9 +190,12 @@ namespace Tac
         {
             DrawWindowContents(windowId);
 
-            if (GUI.Button(new Rect(windowPos.width - 24, 4, 20, 20), "X", closeButtonStyle))
+            if (!HideCloseButton)
             {
-                SetVisible(false);
+                if (GUI.Button(new Rect(windowPos.width - 24, 4, 20, 20), "X", closeButtonStyle))
+                {
+                    SetVisible(false);
+                }
             }
 
             if (Resizable)
