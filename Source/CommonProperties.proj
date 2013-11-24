@@ -62,19 +62,23 @@
       <PackageFiles Include="$(BaseDir)\GameData\**\*" Exclude="$(BaseDir)\**\Thumbs.db" />
     </ItemGroup>
     <Copy SourceFiles="@(PackageFiles)"
-			DestinationFiles="@(PackageFiles->'$(BaseDir)\Release\$(ProjectName)_$(MaxAssemblyFileVersion)\GameData\%(RecursiveDir)%(Filename)%(Extension)')"
-		/>
-    <Copy SourceFiles="$(BaseDir)\LICENSE.txt" DestinationFolder="$(BaseDir)\Release\$(ProjectName)_$(MaxAssemblyFileVersion)\" />
-    <Copy SourceFiles="$(BaseDir)\Readme.txt" DestinationFolder="$(BaseDir)\Release\$(ProjectName)_$(MaxAssemblyFileVersion)\" />
+            DestinationFiles="@(PackageFiles->'$(BaseDir)\Release\$(ProjectName)_$(MaxAssemblyFileVersion)\GameData\%(RecursiveDir)%(Filename)%(Extension)')"
+        />
+    <ItemGroup>
+        <ReadmeFiles Include="$(BaseDir)\LICENSE*" />
+        <ReadmeFiles Include="$(BaseDir)\Readme*" />
+        <ReadmeFiles Include="$(BaseDir)\NOTICE*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(ReadmeFiles)" DestinationFolder="$(BaseDir)\Release\$(ProjectName)_$(MaxAssemblyFileVersion)\" />
 
     <ItemGroup>
       <FilesToZip Include="$(BaseDir)\Release\$(ProjectName)_$(MaxAssemblyFileVersion)\**\*" />
     </ItemGroup>
     <MSBuild.ExtensionPack.Compression.Zip
-			TaskAction="Create"
-			CompressFiles="@(FilesToZip)"
-			ZipFileName="$(BaseDir)\Release\$(ProjectName)_$(MaxAssemblyFileVersion).zip"
-			RemoveRoot="$(BaseDir)\Release\$(ProjectName)_$(MaxAssemblyFileVersion)"
-		/>
+            TaskAction="Create"
+            CompressFiles="@(FilesToZip)"
+            ZipFileName="$(BaseDir)\Release\$(ProjectName)_$(MaxAssemblyFileVersion).zip"
+            RemoveRoot="$(BaseDir)\Release\$(ProjectName)_$(MaxAssemblyFileVersion)"
+        />
   </Target>
 </Project>
