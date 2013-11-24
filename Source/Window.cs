@@ -104,7 +104,7 @@ namespace Tac
             windowPos.height = height;
         }
 
-        public virtual void Load(ConfigNode config)
+        public virtual ConfigNode Load(ConfigNode config)
         {
             if (config.HasNode(configNodeName))
             {
@@ -117,10 +117,16 @@ namespace Tac
 
                 bool newValue = Utilities.GetValue(windowConfig, "visible", visible);
                 SetVisible(newValue);
+
+                return windowConfig;
+            }
+            else
+            {
+                return null;
             }
         }
 
-        public virtual void Save(ConfigNode config)
+        public virtual ConfigNode Save(ConfigNode config)
         {
             ConfigNode windowConfig;
             if (config.HasNode(configNodeName))
@@ -138,6 +144,7 @@ namespace Tac
             windowConfig.AddValue("y", windowPos.y);
             windowConfig.AddValue("width", windowPos.width);
             windowConfig.AddValue("height", windowPos.height);
+            return windowConfig;
         }
 
         protected virtual void DrawWindow()
