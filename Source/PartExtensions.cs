@@ -52,7 +52,7 @@ namespace Tac
         {
             if (resource == null)
             {
-                // TODO error!
+                Debug.LogError("Tac.PartExtensions.TakeResource: resource is null");
                 return 0.0;
             }
 
@@ -65,10 +65,10 @@ namespace Tac
                 case ResourceFlowMode.STACK_PRIORITY_SEARCH:
                     return TakeResource_StackPriority(part, resource, demand);
                 case ResourceFlowMode.EVEN_FLOW:
-                    Debug.LogWarning("TakeResource: ResourceFlowMode.EVEN_FLOW is not supported yet.");
+                    Debug.LogWarning("Tac.PartExtensions.TakeResource: ResourceFlowMode.EVEN_FLOW is not supported yet.");
                     return part.RequestResource(resource.id, demand);
                 default:
-                    Debug.LogWarning("TakeResource: Unknown ResourceFlowMode = " + resource.resourceFlowMode.ToString());
+                    Debug.LogWarning("Tac.PartExtensions.TakeResource: Unknown ResourceFlowMode = " + resource.resourceFlowMode.ToString());
                     return part.RequestResource(resource.id, demand);
             }
         }
@@ -89,7 +89,7 @@ namespace Tac
         {
             if (resource == null)
             {
-                // TODO error!
+                Debug.LogError("Tac.PartExtensions.IsResourceAvailable: resource is null");
                 return 0.0;
             }
 
@@ -102,10 +102,10 @@ namespace Tac
                 case ResourceFlowMode.STACK_PRIORITY_SEARCH:
                     return IsResourceAvailable_StackPriority(part, resource, demand);
                 case ResourceFlowMode.EVEN_FLOW:
-                    Debug.LogWarning("IsResourceAvailable: ResourceFlowMode.EVEN_FLOW is not supported yet.");
+                    Debug.LogWarning("Tac.PartExtensions.IsResourceAvailable: ResourceFlowMode.EVEN_FLOW is not supported yet.");
                     return IsResourceAvailable_AllVessel(part, resource, demand);
                 default:
-                    Debug.LogWarning("IsResourceAvailable: Unknown ResourceFlowMode = " + resource.resourceFlowMode.ToString());
+                    Debug.LogWarning("Tac.PartExtensions.IsResourceAvailable: Unknown ResourceFlowMode = " + resource.resourceFlowMode.ToString());
                     return IsResourceAvailable_AllVessel(part, resource, demand);
             }
         }
@@ -119,7 +119,7 @@ namespace Tac
                 PartResource partResource = part.Resources.Get(resource.id);
                 if (partResource.flowMode == PartResource.FlowMode.None)
                 {
-                    // TODO warning!
+                    Debug.LogWarning("Tac.PartExtensions.TakeResource_NoFlow: cannot take resource from a part where FlowMode is None.");
                     return 0.0;
                 }
                 else if (!partResource.flowState)
@@ -131,7 +131,7 @@ namespace Tac
                 {
                     if (partResource.flowMode == PartResource.FlowMode.In)
                     {
-                        // TODO warning!
+                        Debug.LogWarning("Tac.PartExtensions.TakeResource_NoFlow: cannot take resource from a part where FlowMode is In.");
                         return 0.0;
                     }
 
@@ -143,7 +143,7 @@ namespace Tac
                 {
                     if (partResource.flowMode == PartResource.FlowMode.Out)
                     {
-                        // TODO warning!
+                        Debug.LogWarning("Tac.PartExtensions.TakeResource_NoFlow: cannot give resource to a part where FlowMode is Out.");
                         return 0.0;
                     }
 
@@ -171,22 +171,24 @@ namespace Tac
             {
                 double leftOver = demand;
 
-                // Should I change this to take an equal percentage of what's left in each part instead
-                // of an equal amount from each part?
+                // Takes an equal percentage from each part (rather than an equal amount from each part)
                 var allNonEmptyPartResources = allPartResources.Where(p => p.amount > 0.0 && p.flowMode != PartResource.FlowMode.In);
-                int count = allNonEmptyPartResources.Count();
-                while (leftOver > 0.000000001 && count > 0)
+                double totalAmount = 0.0;
+                foreach (PartResource partResource in allNonEmptyPartResources)
                 {
-                    double takeFromEach = leftOver / count;
+                    totalAmount += partResource.amount;
+                }
+
+                if (totalAmount > 0.0)
+                {
+                    double percentage = Math.Min(demand / totalAmount, 1.0);
+
                     foreach (PartResource partResource in allNonEmptyPartResources)
                     {
-                        double taken = Math.Min(partResource.amount, takeFromEach);
+                        double taken = partResource.amount * percentage;
                         partResource.amount -= taken;
                         leftOver -= taken;
                     }
-
-                    allNonEmptyPartResources = allNonEmptyPartResources.Where(p => p.amount > 0.0);
-                    count = allNonEmptyPartResources.Count();
                 }
 
                 return demand - leftOver;
@@ -196,19 +198,22 @@ namespace Tac
                 double leftOver = -demand;
 
                 var allNonFullPartResources = allPartResources.Where(p => (p.maxAmount - p.amount) > 0.0 && p.flowMode != PartResource.FlowMode.Out);
-                int count = allNonFullPartResources.Count();
-                while (leftOver > 0.000000001 && count > 0)
+                double totalSpace = 0.0;
+                foreach (PartResource partResource in allNonFullPartResources)
                 {
-                    double giveToEach = leftOver / count;
+                    totalSpace += partResource.maxAmount - partResource.amount;
+                }
+
+                if (totalSpace > 0.0)
+                {
+                    double percentage = Math.Min(-demand / totalSpace, 1.0);
+
                     foreach (PartResource partResource in allNonFullPartResources)
                     {
-                        double given = Math.Min(partResource.maxAmount - partResource.amount, giveToEach);
+                        double given = (partResource.maxAmount - partResource.amount) * percentage;
                         partResource.amount += given;
-                        leftOver -= given;
+                        leftOver += given;
                     }
-
-                    allNonFullPartResources = allNonFullPartResources.Where(p => (p.maxAmount - p.amount) > 0.0);
-                    count = allNonFullPartResources.Count();
                 }
 
                 return demand + leftOver;
