@@ -127,7 +127,7 @@ namespace Tac
                     // Resource flow was shut off -- no warning needed
                     return 0.0;
                 }
-                else if (demand > 0.0)
+                else if (demand >= 0.0)
                 {
                     if (partResource.flowMode == PartResource.FlowMode.In)
                     {
@@ -167,7 +167,7 @@ namespace Tac
                                                                 p.Resources.Get(resource.id).flowMode != PartResource.FlowMode.None
                                                           ).Select(p => p.Resources.Get(resource.id));
 
-            if (demand > 0.0)
+            if (demand >= 0.0)
             {
                 double leftOver = demand;
 
@@ -181,7 +181,7 @@ namespace Tac
 
                 if (totalAmount > 0.0)
                 {
-                    double percentage = Math.Min(demand / totalAmount, 1.0);
+                    double percentage = Math.Min(leftOver / totalAmount, 1.0);
 
                     foreach (PartResource partResource in allNonEmptyPartResources)
                     {
@@ -206,13 +206,13 @@ namespace Tac
 
                 if (totalSpace > 0.0)
                 {
-                    double percentage = Math.Min(-demand / totalSpace, 1.0);
+                    double percentage = Math.Min(leftOver / totalSpace, 1.0);
 
                     foreach (PartResource partResource in allNonFullPartResources)
                     {
                         double given = (partResource.maxAmount - partResource.amount) * percentage;
                         partResource.amount += given;
-                        leftOver += given;
+                        leftOver -= given;
                     }
                 }
 
@@ -262,7 +262,7 @@ namespace Tac
                                                                 p.Resources.Get(resource.id).flowMode != PartResource.FlowMode.None
                                                           ).Select(p => p.Resources.Get(resource.id));
 
-            if (demand > 0.0)
+            if (demand >= 0.0)
             {
                 double amountAvailable = 0.0;
 
