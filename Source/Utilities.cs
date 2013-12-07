@@ -273,5 +273,12 @@ namespace Tac
             result += hours.ToString("00") + ":" + minutes.ToString("00") + ":" + seconds.ToString("00");
             return result;
         }
+
+        public static string GetDllVersion<T>(T t)
+        {
+            System.Reflection.Assembly assembly = t.GetType().Assembly;
+            System.Diagnostics.FileVersionInfo fvi = System.Diagnostics.FileVersionInfo.GetVersionInfo(assembly.Location);
+            return fvi.FileVersion;
+        }
     }
 }
