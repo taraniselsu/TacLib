@@ -6,14 +6,17 @@
   <Import Project="$(PROGRAMFILES)\MSBuild\ExtensionPack\4.0\MSBuild.ExtensionPack.VersionNumber.targets" Condition="Exists('$(PROGRAMFILES)\MSBuild\ExtensionPack\4.0\MSBuild.ExtensionPack.VersionNumber.targets')" />
   <Import Project="$(PROGRAMFILES)\MSBuild\ExtensionPack\4.0\MSBuild.ExtensionPack.tasks" Condition="Exists('$(PROGRAMFILES)\MSBuild\ExtensionPack\4.0\MSBuild.ExtensionPack.tasks')" />
   <PropertyGroup>
-    <UseUtc>true</UseUtc>
+    <!-- AssemblyMajorVersion is specified in the project file. -->
+    <!-- AssemblyMinorVersion is specified in the project file. -->
     <AssemblyBuildNumber>0</AssemblyBuildNumber>
-    <AssemblyRevision>0</AssemblyRevision>
     <AssemblyBuildNumberType>NoIncrement</AssemblyBuildNumberType>
+    <AssemblyRevision>0</AssemblyRevision>
     <AssemblyRevisionType>NoIncrement</AssemblyRevisionType>
-    <AssemblyFileBuildNumber>0</AssemblyFileBuildNumber>
-    <AssemblyFileRevision>0</AssemblyFileRevision>
-    <AssemblyFileBuildNumberType>Julian</AssemblyFileBuildNumberType>
+    <!-- AssemblyFileMajorVersion is specified in the project file, should be set equal to AssemblyMajorVersion. -->
+    <!-- AssemblyFileMinorVersion is specified in the project file, should be set equal to AssemblyMinorVersion. -->
+    <!-- AssemblyFileBuildNumber is specified in the project file. -->
+    <AssemblyFileBuildNumberType>NoIncrement</AssemblyFileBuildNumberType>
+    <!-- This will increment the revision number found in the AssemblyInfo.cs file. -->
     <AssemblyFileRevisionType>AutoIncrement</AssemblyFileRevisionType>
     <AssemblyFileRevisionFormat>0</AssemblyFileRevisionFormat>
   </PropertyGroup>
