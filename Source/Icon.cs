@@ -36,7 +36,7 @@ namespace Tac
 {
     public class Icon<T>
     {
-        private const string configNodeName = "Icon";
+        private string configNodeName;
         private bool mouseDown = false;
         private bool mouseWasDragged = false;
         private int iconId;
@@ -46,8 +46,9 @@ namespace Tac
         private GUIStyle iconStyle;
         private bool visible = false;
 
-        public Icon(Rect defaultPosition, string imageFilename, string noImageText, string tooltip, Action onClickHandler)
+        public Icon(Rect defaultPosition, string imageFilename, string noImageText, string tooltip, Action onClickHandler, string configNodeName = "Icon")
         {
+            this.configNodeName = configNodeName;
             this.Log("Constructor: " + imageFilename);
             this.iconId = imageFilename.GetHashCode();
             this.iconPos = defaultPosition;
