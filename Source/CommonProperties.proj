@@ -22,19 +22,19 @@
   </PropertyGroup>
   <Target Name="GitInfo">
     <!-- Get the current git SHA1 -->
-    <Exec Command="git log -1 --format='%%h'" ConsoleToMSBuild="true" EchoOff="true">
+    <Exec Command="git log -1 --format='%%h'" ConsoleToMSBuild="true" EchoOff="true" WorkingDirectory="$(BaseDir)\">
       <Output TaskParameter="ConsoleOutput" PropertyName="GitSHA" />
     </Exec>
-    <Exec Command="git log -1 --format='%%h'" ConsoleToMSBuild="true" EchoOff="true" WorkingDirectory="$(BaseDir)\..\TacLib\">
+    <Exec Command="git log -1 --format='%%h'" ConsoleToMSBuild="true" EchoOff="true" WorkingDirectory="$(BaseDir)\TacLib\">
       <Output TaskParameter="ConsoleOutput" PropertyName="GitSHA2" />
     </Exec>
     <Message Text="Current Git SHA = $(GitSHA)+$(GitSHA2)" />
 
     <!-- Check that the workspace matches the repository. -->
-    <Exec Command="git status -s | grep -v AssemblyInfo.cs" ConsoleToMSBuild="true" EchoOff="true" IgnoreExitCode="true">
+    <Exec Command="git status -s | grep -v AssemblyInfo.cs" ConsoleToMSBuild="true" EchoOff="true" IgnoreExitCode="true" WorkingDirectory="$(BaseDir)\">
       <Output TaskParameter="ConsoleOutput" PropertyName="GitStatusCheck" />
     </Exec>
-    <Exec Command="git status -s" ConsoleToMSBuild="true" EchoOff="true" IgnoreExitCode="true" WorkingDirectory="$(BaseDir)\..\TacLib\">
+    <Exec Command="git status -s" ConsoleToMSBuild="true" EchoOff="true" IgnoreExitCode="true" WorkingDirectory="$(BaseDir)\TacLib\">
       <Output TaskParameter="ConsoleOutput" PropertyName="GitStatusCheck2" />
     </Exec>
     <Warning Condition="$(GitStatusCheck) != ''" Text="Your workspace is not clean" />
