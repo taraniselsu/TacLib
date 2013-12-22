@@ -44,7 +44,34 @@ namespace Tac
         private Action onClick;
         private GUIContent content;
         private GUIStyle iconStyle;
-        private bool visible = false;
+
+        private bool visible;
+        public bool Visible
+        {
+            get
+            {
+                return visible;
+            }
+            set
+            {
+                if (value)
+                {
+                    if (!visible)
+                    {
+                        RenderingManager.AddToPostDrawQueue(3, DrawIcon);
+                    }
+                }
+                else
+                {
+                    if (visible)
+                    {
+                        RenderingManager.RemoveFromPostDrawQueue(3, DrawIcon);
+                    }
+                }
+
+                visible = value;
+            }
+        }
 
         public Icon(Rect defaultPosition, string imageFilename, string noImageText, string tooltip, Action onClickHandler, string configNodeName = "Icon")
         {
@@ -54,33 +81,15 @@ namespace Tac
             this.iconPos = defaultPosition;
             this.onClick = onClickHandler;
 
-            var texture = Utilities.LoadImage<T>(IOUtils.GetFilePathFor(typeof(T), imageFilename));
-            content = (texture != null) ? new GUIContent(texture, tooltip) : new GUIContent(noImageText, tooltip);
-        }
-
-        public void SetVisible(bool newValue)
-        {
-            if (newValue)
+            if (GameDatabase.Instance.ExistsTexture(imageFilename))
             {
-                if (!visible)
-                {
-                    RenderingManager.AddToPostDrawQueue(3, DrawIcon);
-                }
+                Texture2D texture = GameDatabase.Instance.GetTexture(imageFilename, false);
+                content = new GUIContent(texture, tooltip);
             }
             else
             {
-                if (visible)
-                {
-                    RenderingManager.RemoveFromPostDrawQueue(3, DrawIcon);
-                }
+                content = new GUIContent(noImageText, tooltip);
             }
-
-            this.visible = newValue;
-        }
-
-        public bool IsVisible()
-        {
-            return visible;
         }
 
         private void DrawIcon()
