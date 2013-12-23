@@ -74,7 +74,7 @@ namespace Tac
             button = ToolbarButton.Create(imageFilename, noImageText, tooltip, onClickHandler);
             if (button == null)
             {
-                this.Log("Failed to create toolbar button, using my Icon instead.");
+                this.Log("Failed to create the toolbar button, using my Icon instead.");
                 icon = new Icon<ButtonWrapper>(defaultPosition, imageFilename, noImageText, tooltip,
                     onClickHandler, configNodeName);
             }

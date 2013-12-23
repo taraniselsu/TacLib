@@ -28,54 +28,201 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
-using UnityEngine;
-using Toolbar;
 
 namespace Tac
 {
     public class ToolbarButton
     {
-        private IButton button;
+        private static bool typeInfoIsLoaded = false;
+        private static Assembly assembly = null;
+        private static Type buttonType = null;
+        private static PropertyInfo toolTipProperty = null;
+        private static PropertyInfo textProperty = null;
+        private static PropertyInfo texturePathProperty = null;
+        private static PropertyInfo visibleProperty = null;
+        private static MethodInfo destroyMethod = null;
+
+        private static EventInfo onClickEvent = null;
+        private static Type clickEventType = null;
+        private static MethodInfo clickEventAddMethod = null;
+
+        private object buttonInstance = null;
 
         public bool Visible
         {
             get
             {
-                return button.Visible;
+                return (bool)visibleProperty.GetValue(buttonInstance, null);
             }
             set
             {
-                button.Visible = value;
+                visibleProperty.SetValue(buttonInstance, value, null);
             }
         }
 
-        private ToolbarButton(string imageFilename, string noImageText,
-            string tooltip, Action onClickHandler)
+        public string ToolTip
         {
-            button = ToolbarManager.Instance.add("Tac", noImageText);
-            button.ToolTip = tooltip;
-            button.OnClick += e => { onClickHandler(); };
+            set
+            {
+                toolTipProperty.SetValue(buttonInstance, value, null);
+            }
+        }
 
-            if (GameDatabase.Instance.ExistsTexture(imageFilename))
+        public string TexturePath
+        {
+            set
             {
-                button.TexturePath = imageFilename;
+                texturePathProperty.SetValue(buttonInstance, value, null);
             }
-            else
+        }
+
+        public string Text
+        {
+            set
             {
-                button.Text = noImageText;
+                textProperty.SetValue(buttonInstance, value, null);
             }
+        }
+
+        private ToolbarButton(object buttonInstance)
+        {
+            this.buttonInstance = buttonInstance;
+        }
+
+        public void AddOnClickHandler(Action<object> handler)
+        {
+            Delegate d = Delegate.CreateDelegate(clickEventType, handler.Target, handler.Method);
+            clickEventAddMethod.Invoke(buttonInstance, new object[] { d });
         }
 
         public void Destroy()
         {
-            button.Destroy();
+            destroyMethod.Invoke(buttonInstance, null);
         }
 
         public static ToolbarButton Create(string imageFilename, string noImageText,
             string tooltip, Action onClickHandler)
         {
-            return new ToolbarButton(imageFilename, noImageText, tooltip, onClickHandler);
+            try
+            {
+                if (!typeInfoIsLoaded && !LoadTypeInfo())
+                {
+                    // The error was already logged in LoadTypeInfo
+                    return null;
+                }
+
+                var b = ToolbarWrapper.AddButton("Tac", noImageText);
+                if (b == null)
+                {
+                    LogWarningS("Failed to create the Toolbar Button");
+                    return null;
+                }
+
+                ToolbarButton button = new ToolbarButton(b);
+                button.ToolTip = tooltip;
+                button.AddOnClickHandler(e => onClickHandler());
+
+                if (GameDatabase.Instance.ExistsTexture(imageFilename))
+                {
+                    button.TexturePath = imageFilename;
+                }
+                else
+                {
+                    button.Text = noImageText;
+                }
+
+                button.Log("Create successful.");
+                return button;
+            }
+            catch (Exception ex)
+            {
+                LogWarningS("Exception while creating the Toolbar button: " + ex.Message);
+                return null;
+            }
+        }
+
+        private static bool LoadTypeInfo()
+        {
+            AssemblyLoader.LoadedAssembly loadedAssembly = AssemblyLoader.loadedAssemblies.FirstOrDefault(a => a.dllName == "Toolbar");
+            if (loadedAssembly == null)
+            {
+                LogWarningS("Could not find Toolbar.dll.");
+                return false;
+            }
+            assembly = loadedAssembly.assembly;
+
+            buttonType = assembly.GetExportedTypes().FirstOrDefault(t => t.FullName == "Toolbar.IButton");
+            if (buttonType == null)
+            {
+                LogWarningS("Could not find the Toolbar.IButton type.");
+                return false;
+            }
+
+            toolTipProperty = buttonType.GetProperty("ToolTip");
+            if (toolTipProperty == null)
+            {
+                LogWarningS("Could not find the ToolTip property.");
+                return false;
+            }
+
+            textProperty = buttonType.GetProperty("Text");
+            if (textProperty == null)
+            {
+                LogWarningS("Could not find the Text property.");
+                return false;
+            }
+
+            texturePathProperty = buttonType.GetProperty("TexturePath");
+            if (texturePathProperty == null)
+            {
+                LogWarningS("Could not find the TexturePath property.");
+                return false;
+            }
+
+            visibleProperty = buttonType.GetProperty("Visible");
+            if (visibleProperty == null)
+            {
+                LogWarningS("Could not get the Visible property.");
+                return false;
+            }
+
+            destroyMethod = buttonType.GetMethod("Destroy");
+            if (destroyMethod == null)
+            {
+                LogWarningS("Could not find the Destroy method.");
+                return false;
+            }
+
+            onClickEvent = buttonType.GetEvent("OnClick");
+            if (onClickEvent == null)
+            {
+                LogWarningS("Could not find the OnClick event.");
+                return false;
+            }
+
+            clickEventType = onClickEvent.EventHandlerType;
+            if (clickEventType == null)
+            {
+                LogWarningS("Could not get the OnClick event handler type.");
+                return false;
+            }
+
+            clickEventAddMethod = onClickEvent.GetAddMethod();
+            if (clickEventAddMethod == null)
+            {
+                LogWarningS("Could not get the add method for the OnClick event.");
+                return false;
+            }
+
+            typeInfoIsLoaded = true;
+            return true;
+        }
+
+        private static void LogWarningS(String message)
+        {
+            Logging.Log("Tac.ToolbarButton", message);
         }
     }
 }

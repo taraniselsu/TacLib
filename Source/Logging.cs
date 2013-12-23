@@ -65,5 +65,20 @@ namespace Tac
         {
             Debug.LogError(obj.GetType().FullName + "[" + obj.GetHashCode().ToString("X") + "][" + Time.time.ToString("0.00") + "]: " + message);
         }
+
+        public static void Log(string context, string message)
+        {
+            Debug.Log(context + "[][" + Time.time.ToString("0.00") + "]: " + message);
+        }
+
+        public static void LogWarning(string context, string message)
+        {
+            Debug.LogWarning(context + "[][" + Time.time.ToString("0.00") + "]: " + message);
+        }
+
+        public static void LogError(string context, string message)
+        {
+            Debug.LogError(context + "[][" + Time.time.ToString("0.00") + "]: " + message);
+        }
     }
 }
