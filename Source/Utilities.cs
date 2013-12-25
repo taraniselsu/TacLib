@@ -240,38 +240,54 @@ namespace Tac
             return result;
         }
 
-        public static string FormatTime(double time)
+        public static string FormatTime(double value, int numDecimals = 0)
         {
-            const int SECONDS_PER_MINUTE = 60;
-            const int SECONDS_PER_HOUR = 3600;
-            const int SECONDS_PER_DAY = 24 * SECONDS_PER_HOUR;
+            const double SECONDS_PER_MINUTE = 60.0;
+            const double MINUTES_PER_HOUR = 60.0;
+            const double HOURS_PER_DAY = 24.0;
 
-            time = (int)time;
-
-            string result = "";
-            if (time < 0)
+            string sign = "";
+            if (value < 0.0)
             {
-                result += "-";
-                time = -time;
+                sign = "-";
+                value = -value;
             }
 
-            int days = (int)(time / SECONDS_PER_DAY);
-            time -= days * SECONDS_PER_DAY;
+            double seconds = value;
 
-            int hours = (int)(time / SECONDS_PER_HOUR);
-            time -= hours * SECONDS_PER_HOUR;
+            long minutes = (long)(seconds / SECONDS_PER_MINUTE);
+            seconds -= (long)(minutes * SECONDS_PER_MINUTE);
 
-            int minutes = (int)(time / SECONDS_PER_MINUTE);
-            time -= minutes * SECONDS_PER_MINUTE;
+            long hours = (long)(minutes / MINUTES_PER_HOUR);
+            minutes -= (long)(hours * MINUTES_PER_HOUR);
 
-            int seconds = (int)time;
+            long days = (long)(hours / HOURS_PER_DAY);
+            hours -= (long)(days * HOURS_PER_DAY);
 
             if (days > 0)
             {
-                result += days.ToString("#0") + ":";
+                return sign + days.ToString("#0") + "d "
+                    + hours.ToString("00") + ":"
+                    + minutes.ToString("00") + ":"
+                    + seconds.ToString("00");
             }
-            result += hours.ToString("00") + ":" + minutes.ToString("00") + ":" + seconds.ToString("00");
-            return result;
+            else if (hours > 0)
+            {
+                return sign + hours.ToString("#0") + ":"
+                    + minutes.ToString("00") + ":"
+                    + seconds.ToString("00");
+            }
+            else
+            {
+                string d = "";
+                if (numDecimals > 0)
+                {
+                    d = "." + new String('0', numDecimals);
+                }
+
+                return sign + minutes.ToString("#0") + ":"
+                    + seconds.ToString("00" + d);
+            }
         }
 
         public static string GetDllVersion<T>(T t)
