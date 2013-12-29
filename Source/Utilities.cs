@@ -36,6 +36,16 @@ namespace Tac
 {
     public static class Utilities
     {
+        public static double ToDegrees(double radians)
+        {
+            return radians * 180.0 / Math.PI;
+        }
+
+        public static double ToRadians(double degrees)
+        {
+            return degrees * Math.PI / 180.0;
+        }
+
         public static Rect EnsureVisible(Rect pos, float min = 16.0f)
         {
             float xMin = min - pos.width;
