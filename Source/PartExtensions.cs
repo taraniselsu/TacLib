@@ -158,21 +158,41 @@ namespace Tac
             }
         }
 
+        private static List<PartResource> ListAllResources(Vessel vessel, PartResourceDefinition resource, bool consuming)
+        {
+            var allPartResources = new List<PartResource>(vessel.parts.Count);
+
+            foreach (var p in vessel.parts)
+            {
+                var res = p.Resources.Get(resource.id);
+
+                if ((object)res == null || !res.flowState || res.flowMode == PartResource.FlowMode.None)
+                    continue;
+
+                if (consuming)
+                {
+                    if (res.amount > 0.0 && res.flowMode != PartResource.FlowMode.In)
+                        allPartResources.Add(res);
+                }
+                else
+                {
+                    if (res.amount < res.maxAmount && res.flowMode != PartResource.FlowMode.Out)
+                        allPartResources.Add(res);
+                }
+            }
+
+            return allPartResources;
+        }
+
         private static double TakeResource_AllVessel(Part part, PartResourceDefinition resource, double demand)
         {
             // ignoring PartResourceDefinition.ResourceTransferMode
-
-            var allPartResources = part.vessel.parts.Where(p => p.Resources.Contains(resource.id) &&
-                                                                p.Resources.Get(resource.id).flowState == true &&
-                                                                p.Resources.Get(resource.id).flowMode != PartResource.FlowMode.None
-                                                          ).Select(p => p.Resources.Get(resource.id));
-
             if (demand >= 0.0)
             {
                 double leftOver = demand;
 
                 // Takes an equal percentage from each part (rather than an equal amount from each part)
-                var allNonEmptyPartResources = allPartResources.Where(p => p.amount > 0.0 && p.flowMode != PartResource.FlowMode.In);
+                var allNonEmptyPartResources = ListAllResources(part.vessel, resource, true);
                 double totalAmount = 0.0;
                 foreach (PartResource partResource in allNonEmptyPartResources)
                 {
@@ -197,7 +217,7 @@ namespace Tac
             {
                 double leftOver = -demand;
 
-                var allNonFullPartResources = allPartResources.Where(p => (p.maxAmount - p.amount) > 0.0 && p.flowMode != PartResource.FlowMode.Out);
+                var allNonFullPartResources = ListAllResources(part.vessel, resource, false);
                 double totalSpace = 0.0;
                 foreach (PartResource partResource in allNonFullPartResources)
                 {
@@ -257,16 +277,11 @@ namespace Tac
 
         private static double IsResourceAvailable_AllVessel(Part part, PartResourceDefinition resource, double demand)
         {
-            var allPartResources = part.vessel.parts.Where(p => p.Resources.Contains(resource.id) &&
-                                                                p.Resources.Get(resource.id).flowState == true &&
-                                                                p.Resources.Get(resource.id).flowMode != PartResource.FlowMode.None
-                                                          ).Select(p => p.Resources.Get(resource.id));
-
             if (demand >= 0.0)
             {
                 double amountAvailable = 0.0;
 
-                var allNonInPartResources = allPartResources.Where(p => p.flowMode != PartResource.FlowMode.In);
+                var allNonInPartResources = ListAllResources(part.vessel, resource, true);
                 foreach (PartResource partResource in allNonInPartResources)
                 {
                     amountAvailable += partResource.amount;
@@ -283,7 +298,7 @@ namespace Tac
             {
                 double availableSpace = 0.0;
 
-                var allNonOutPartResources = allPartResources.Where(p => p.flowMode != PartResource.FlowMode.Out);
+                var allNonOutPartResources = ListAllResources(part.vessel, resource, false);
                 foreach (PartResource partResource in allNonOutPartResources)
                 {
                     availableSpace += (partResource.maxAmount - partResource.amount);
