@@ -199,30 +199,31 @@ namespace Tac
 
             if (!HideCloseButton)
             {
-                DrawCloseButton();
+                if (DrawCloseButton())
+                {
+                    SetVisible(false);
+                }
             }
 
             if (Resizable)
             {
-                DrawResizeButton();
+                HandleWindowEvents(DrawResizeButton());
             }
 
             GUI.DragWindow();
         }
 
-        protected virtual void DrawCloseButton()
+        protected virtual bool DrawCloseButton()
         {
-            if (GUI.Button(new Rect(windowPos.width - 24, 4, 20, 20), "X", closeButtonStyle)) {
-                SetVisible(false);
-            }
+            return GUI.Button(new Rect(windowPos.width - 24, 4, 20, 20), "X", closeButtonStyle));
         }
 
-        protected virtual void DrawResizeButton()
+        protected virtual Rect DrawResizeButton()
         {
             var resizeRect = new Rect(windowPos.width - 16, windowPos.height - 16, 16, 16);
             GUI.Label(resizeRect, resizeContent, resizeStyle);
 
-            HandleWindowEvents(resizeRect);
+            return resizeRect;
         }
 
         protected abstract void DrawWindowContents(int windowId);
