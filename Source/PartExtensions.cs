@@ -158,43 +158,16 @@ namespace Tac
             }
         }
 
-        private static List<PartResource> ListAllResources(Vessel vessel, PartResourceDefinition resource, bool consuming)
-        {
-            var allPartResources = new List<PartResource>(vessel.parts.Count);
-
-            foreach (var p in vessel.parts)
-            {
-                var res = p.Resources.Get(resource.id);
-
-                if ((object)res == null || !res.flowState || res.flowMode == PartResource.FlowMode.None)
-                    continue;
-
-                if (consuming)
-                {
-                    if (res.amount > 0.0 && res.flowMode != PartResource.FlowMode.In)
-                        allPartResources.Add(res);
-                }
-                else
-                {
-                    if (res.amount < res.maxAmount && res.flowMode != PartResource.FlowMode.Out)
-                        allPartResources.Add(res);
-                }
-            }
-
-            return allPartResources;
-        }
-
         private static double TakeResource_AllVessel(Part part, PartResourceDefinition resource, double demand)
         {
-            // ignoring PartResourceDefinition.ResourceTransferMode
             if (demand >= 0.0)
             {
                 double leftOver = demand;
 
                 // Takes an equal percentage from each part (rather than an equal amount from each part)
-                var allNonEmptyPartResources = ListAllResources(part.vessel, resource, true);
+                List<PartResource> partResources = GetAllPartResources(part.vessel, resource, true);
                 double totalAmount = 0.0;
-                foreach (PartResource partResource in allNonEmptyPartResources)
+                foreach (PartResource partResource in partResources)
                 {
                     totalAmount += partResource.amount;
                 }
@@ -203,7 +176,7 @@ namespace Tac
                 {
                     double percentage = Math.Min(leftOver / totalAmount, 1.0);
 
-                    foreach (PartResource partResource in allNonEmptyPartResources)
+                    foreach (PartResource partResource in partResources)
                     {
                         double taken = partResource.amount * percentage;
                         partResource.amount -= taken;
@@ -217,9 +190,9 @@ namespace Tac
             {
                 double leftOver = -demand;
 
-                var allNonFullPartResources = ListAllResources(part.vessel, resource, false);
+                List<PartResource> partResources = GetAllPartResources(part.vessel, resource, false);
                 double totalSpace = 0.0;
-                foreach (PartResource partResource in allNonFullPartResources)
+                foreach (PartResource partResource in partResources)
                 {
                     totalSpace += partResource.maxAmount - partResource.amount;
                 }
@@ -228,9 +201,10 @@ namespace Tac
                 {
                     double percentage = Math.Min(leftOver / totalSpace, 1.0);
 
-                    foreach (PartResource partResource in allNonFullPartResources)
+                    foreach (PartResource partResource in partResources)
                     {
-                        double given = (partResource.maxAmount - partResource.amount) * percentage;
+                        double space = partResource.maxAmount - partResource.amount;
+                        double given = space * percentage;
                         partResource.amount += given;
                         leftOver -= given;
                     }
@@ -281,14 +255,20 @@ namespace Tac
             {
                 double amountAvailable = 0.0;
 
-                var allNonInPartResources = ListAllResources(part.vessel, resource, true);
-                foreach (PartResource partResource in allNonInPartResources)
+                foreach (Part p in part.vessel.parts)
                 {
-                    amountAvailable += partResource.amount;
-
-                    if (amountAvailable >= demand)
+                    PartResource partResource = p.Resources.Get(resource.id);
+                    if (partResource != null)
                     {
-                        return demand;
+                        if (partResource.flowState && partResource.flowMode != PartResource.FlowMode.None && partResource.flowMode != PartResource.FlowMode.In)
+                        {
+                            amountAvailable += partResource.amount;
+
+                            if (amountAvailable >= demand)
+                            {
+                                return demand;
+                            }
+                        }
                     }
                 }
 
@@ -297,15 +277,22 @@ namespace Tac
             else
             {
                 double availableSpace = 0.0;
+                double demandedSpace = -demand;
 
-                var allNonOutPartResources = ListAllResources(part.vessel, resource, false);
-                foreach (PartResource partResource in allNonOutPartResources)
+                foreach (Part p in part.vessel.parts)
                 {
-                    availableSpace += (partResource.maxAmount - partResource.amount);
-
-                    if (availableSpace >= -demand)
+                    PartResource partResource = p.Resources.Get(resource.id);
+                    if (partResource != null)
                     {
-                        return demand;
+                        if (partResource.flowState && partResource.flowMode != PartResource.FlowMode.None && partResource.flowMode != PartResource.FlowMode.Out)
+                        {
+                            availableSpace += (partResource.maxAmount - partResource.amount);
+
+                            if (availableSpace >= demandedSpace)
+                            {
+                                return demand;
+                            }
+                        }
                     }
                 }
 
@@ -317,6 +304,39 @@ namespace Tac
         {
             // FIXME finish implementing
             return IsResourceAvailable_AllVessel(part, resource, demand);
+        }
+
+        private static List<PartResource> GetAllPartResources(Vessel vessel, PartResourceDefinition resource, bool consuming)
+        {
+            // ignoring PartResourceDefinition.ResourceTransferMode
+            List<PartResource> resources = new List<PartResource>();
+
+            foreach (Part p in vessel.parts)
+            {
+                PartResource partResource = p.Resources.Get(resource.id);
+                if (partResource != null)
+                {
+                    if (partResource.flowState && partResource.flowMode != PartResource.FlowMode.None)
+                    {
+                        if (consuming)
+                        {
+                            if (partResource.flowMode != PartResource.FlowMode.In && partResource.amount > 0.0)
+                            {
+                                resources.Add(partResource);
+                            }
+                        }
+                        else
+                        {
+                            if (partResource.flowMode != PartResource.FlowMode.Out && partResource.amount < partResource.maxAmount)
+                            {
+                                resources.Add(partResource);
+                            }
+                        }
+                    }
+                }
+            }
+
+            return resources;
         }
     }
 }
