@@ -306,5 +306,20 @@ namespace Tac
             System.Diagnostics.FileVersionInfo fvi = System.Diagnostics.FileVersionInfo.GetVersionInfo(assembly.Location);
             return fvi.FileVersion;
         }
+
+        public static GUIStyle GetVersionStyle()
+        {
+            GUIStyle versionStyle = new GUIStyle(GUI.skin.label);
+            versionStyle.alignment = TextAnchor.MiddleLeft;
+            versionStyle.fontSize = 10;
+            versionStyle.fontStyle = FontStyle.Normal;
+            versionStyle.normal.textColor = Color.white;
+            versionStyle.margin.top = 0;
+            versionStyle.margin.bottom = 0;
+            versionStyle.padding.top = 0;
+            versionStyle.padding.bottom = 0;
+            versionStyle.wordWrap = false;
+            return versionStyle;
+        }
     }
 }
