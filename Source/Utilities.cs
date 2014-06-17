@@ -254,7 +254,7 @@ namespace Tac
         {
             const double SECONDS_PER_MINUTE = 60.0;
             const double MINUTES_PER_HOUR = 60.0;
-            const double HOURS_PER_DAY = 24.0;
+            double HOURS_PER_DAY = (GameSettings.KERBIN_TIME) ? 6.0 : 24.0;
 
             string sign = "";
             if (value < 0.0)
