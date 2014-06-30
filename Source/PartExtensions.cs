@@ -64,8 +64,8 @@ namespace Tac
                     return TakeResource_AllVessel(part, resource, demand);
                 case ResourceFlowMode.STACK_PRIORITY_SEARCH:
                     return TakeResource_StackPriority(part, resource, demand);
-                case ResourceFlowMode.EVEN_FLOW:
-                    Debug.LogWarning("Tac.PartExtensions.TakeResource: ResourceFlowMode.EVEN_FLOW is not supported yet.");
+                case ResourceFlowMode.STAGE_PRIORITY_FLOW:
+                    Debug.LogWarning("Tac.PartExtensions.TakeResource: ResourceFlowMode.STAGE_PRIORITY_FLOW is not supported yet.");
                     return part.RequestResource(resource.id, demand);
                 default:
                     Debug.LogWarning("Tac.PartExtensions.TakeResource: Unknown ResourceFlowMode = " + resource.resourceFlowMode.ToString());
@@ -101,8 +101,8 @@ namespace Tac
                     return IsResourceAvailable_AllVessel(part, resource, demand);
                 case ResourceFlowMode.STACK_PRIORITY_SEARCH:
                     return IsResourceAvailable_StackPriority(part, resource, demand);
-                case ResourceFlowMode.EVEN_FLOW:
-                    Debug.LogWarning("Tac.PartExtensions.IsResourceAvailable: ResourceFlowMode.EVEN_FLOW is not supported yet.");
+                case ResourceFlowMode.STAGE_PRIORITY_FLOW:
+                    Debug.LogWarning("Tac.PartExtensions.IsResourceAvailable: ResourceFlowMode.STAGE_PRIORITY_FLOW is not supported yet.");
                     return IsResourceAvailable_AllVessel(part, resource, demand);
                 default:
                     Debug.LogWarning("Tac.PartExtensions.IsResourceAvailable: Unknown ResourceFlowMode = " + resource.resourceFlowMode.ToString());
@@ -114,9 +114,9 @@ namespace Tac
         {
             // ignoring PartResourceDefinition.ResourceTransferMode
 
-            if (part.Resources.Contains(resource.id))
+            PartResource partResource = part.Resources.Get(resource.id);
+            if (partResource != null)
             {
-                PartResource partResource = part.Resources.Get(resource.id);
                 if (partResource.flowMode == PartResource.FlowMode.None)
                 {
                     Debug.LogWarning("Tac.PartExtensions.TakeResource_NoFlow: cannot take resource from a part where FlowMode is None.");
@@ -222,10 +222,9 @@ namespace Tac
 
         private static double IsResourceAvailable_NoFlow(Part part, PartResourceDefinition resource, double demand)
         {
-            if (part.Resources.Contains(resource.id))
+            PartResource partResource = part.Resources.Get(resource.id);
+            if (partResource != null)
             {
-                PartResource partResource = part.Resources.Get(resource.id);
-
                 if (partResource.flowMode == PartResource.FlowMode.None || partResource.flowState == false)
                 {
                     return 0.0;
