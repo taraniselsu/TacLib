@@ -289,14 +289,59 @@ namespace Tac
             }
             else
             {
-                string d = "";
+                string format = "00";
                 if (numDecimals > 0)
                 {
-                    d = "." + new String('0', numDecimals);
+                    format += "." + new String('0', numDecimals);
                 }
 
                 return sign + minutes.ToString("#0") + ":"
-                    + seconds.ToString("00" + d);
+                    + seconds.ToString(format);
+            }
+        }
+
+        public static string FormatValue(double value, int numDecimals = 2)
+        {
+            string sign = "";
+            if (value < 0.0)
+            {
+                sign = "-";
+                value = -value;
+            }
+
+            string format = "0";
+            if (numDecimals > 0)
+            {
+                format += "." + new String('0', numDecimals);
+            }
+
+            if (value > 1000000000.0)
+            {
+                return sign + (value / 1000000000.0).ToString(format) + " G";
+            }
+            else if (value > 1000000.0)
+            {
+                return sign + (value / 1000000.0).ToString(format) + " M";
+            }
+            else if (value > 1000.0)
+            {
+                return sign + (value / 1000.0).ToString(format) + " k";
+            }
+            else if (value < 0.000000001)
+            {
+                return sign + (value * 1000000000.0).ToString(format) + " n";
+            }
+            else if (value < 0.000001)
+            {
+                return sign + (value * 1000000.0).ToString(format) + " µ";
+            }
+            else if (value < 0.001)
+            {
+                return sign + (value * 1000.0).ToString(format) + " m";
+            }
+            else
+            {
+                return sign + value.ToString(format) + " ";
             }
         }
 
