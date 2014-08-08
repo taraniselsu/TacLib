@@ -8,17 +8,18 @@
   <PropertyGroup>
     <!-- AssemblyMajorVersion is specified in the project file. -->
     <!-- AssemblyMinorVersion is specified in the project file. -->
-    <AssemblyBuildNumber>0</AssemblyBuildNumber>
+    <!-- AssemblyBuildNumber is specified in the project file. -->
     <AssemblyBuildNumberType>NoIncrement</AssemblyBuildNumberType>
-    <AssemblyRevision>0</AssemblyRevision>
     <AssemblyRevisionType>NoIncrement</AssemblyRevisionType>
     <!-- AssemblyFileMajorVersion is specified in the project file, should be set equal to AssemblyMajorVersion. -->
     <!-- AssemblyFileMinorVersion is specified in the project file, should be set equal to AssemblyMinorVersion. -->
-    <!-- AssemblyFileBuildNumber is specified in the project file. -->
+    <!-- AssemblyFileBuildNumber is specified in the project file, should be set equal to AssemblyBuildNumber. -->
     <AssemblyFileBuildNumberType>NoIncrement</AssemblyFileBuildNumberType>
     <!-- This will increment the revision number found in the AssemblyInfo.cs file. -->
     <AssemblyFileRevisionType>AutoIncrement</AssemblyFileRevisionType>
     <AssemblyFileRevisionFormat>0</AssemblyFileRevisionFormat>
+    <!-- does not work for some reason -->
+    <AssemblyRevision>$(AssemblyFileRevision)</AssemblyRevision>
   </PropertyGroup>
 
   <Target Name="GitInfo">
