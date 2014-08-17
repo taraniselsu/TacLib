@@ -34,7 +34,7 @@ namespace Tac
     {
         private static GameObject go;
         private static PopupWindow instance;
-        private int windowId;
+        private readonly int windowId;
         private bool showPopup;
         private Rect popupPos;
         private Func<int, object, bool> callback;
@@ -50,10 +50,13 @@ namespace Tac
             return instance;
         }
 
+        PopupWindow()
+        {
+            windowId = "Tac.PopupWindow".GetHashCode();
+        }
+
         void Awake()
         {
-            instance = this;
-            windowId = "Tac.PopupWindow".GetHashCode();
             showPopup = false;
         }
 
@@ -71,11 +74,24 @@ namespace Tac
         {
             GUI.BringWindowToFront(windowId);
 
+            var pos = popupPos;
+            var c = callback;
+
             bool shouldClose = callback(windowId, parameter);
 
-            if (shouldClose)
+            if (shouldClose && c == callback)
             {
                 showPopup = false;
+            }
+
+            // Close the popup window if clicked somewhere outside it
+            if (c == callback && (Input.GetMouseButton(0) || Input.GetMouseButton(1) || Input.GetMouseButton(2)))
+            {
+                var mousePos = new Vector3(Input.mousePosition.x, Screen.height - Input.mousePosition.y, Input.mousePosition.z);
+                if (!pos.Contains(mousePos))
+                {
+                    showPopup = false;
+                }
             }
         }
 
@@ -89,17 +105,11 @@ namespace Tac
             {
                 pw.showPopup = true;
 
-                // pw.popupPos = new Rect(windowPos.x + rect.xMin, windowPos.y + rect.yMax + 1, 10, 10);
                 var mouse = Input.mousePosition;
                 pw.popupPos = new Rect(mouse.x - 10, Screen.height - mouse.y - 10, 10, 10);
 
                 pw.callback = popupDrawCallback;
                 pw.parameter = parameter;
-            }
-
-            if (Event.current.rawType == EventType.MouseUp)
-            {
-                pw.showPopup = false;
             }
         }
     }
