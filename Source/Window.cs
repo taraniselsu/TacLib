@@ -49,6 +49,7 @@ namespace Tac
 
         public bool Resizable { get; set; }
         public bool HideCloseButton { get; set; }
+        public bool HideWhenPaused { get; set; }
 
         protected Window(string windowTitle, float defaultWidth, float defaultHeight)
         {
@@ -66,6 +67,7 @@ namespace Tac
 
             Resizable = true;
             HideCloseButton = false;
+            HideWhenPaused = true;
         }
 
         public bool IsVisible()
@@ -152,7 +154,7 @@ namespace Tac
             if (visible)
             {
                 bool paused = false;
-                if (HighLogic.LoadedSceneIsFlight)
+                if (HideWhenPaused && HighLogic.LoadedSceneIsFlight)
                 {
                     try
                     {
