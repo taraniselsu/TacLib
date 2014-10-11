@@ -100,6 +100,11 @@ namespace Tac
             SetVisible(!visible);
         }
 
+        public bool Contains(Vector2 point)
+        {
+            return windowPos.Contains(point);
+        }
+
         public void SetSize(int width, int height)
         {
             windowPos.width = width;
