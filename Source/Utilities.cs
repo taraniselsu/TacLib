@@ -300,7 +300,7 @@ namespace Tac
             }
         }
 
-        public static string FormatValue(double value, int numDecimals = 2)
+        public static string FormatValue(double value, int numDecimals = 2, bool fixedDecimals = false)
         {
             string sign = "";
             if (value < 0.0)
@@ -312,10 +312,21 @@ namespace Tac
             string format = "0";
             if (numDecimals > 0)
             {
-                format += "." + new String('0', numDecimals);
+                if (fixedDecimals)
+                {
+                    format += "." + new String('0', numDecimals);
+                }
+                else
+                {
+                    format += "." + new String('#', numDecimals);
+                }
             }
 
-            if (value > 1000000000.0)
+            if (value == 0.0)
+            {
+                return sign + value.ToString(format) + " ";
+            }
+            else if (value > 1000000000.0)
             {
                 return sign + (value / 1000000000.0).ToString(format) + " G";
             }
