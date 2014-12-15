@@ -279,24 +279,32 @@ namespace Tac
                 return sign + days.ToString("#0") + "d "
                     + hours.ToString("00") + ":"
                     + minutes.ToString("00") + ":"
-                    + seconds.ToString("00");
+                    + Math.Floor(seconds).ToString("00");
             }
             else if (hours > 0)
             {
                 return sign + hours.ToString("#0") + ":"
                     + minutes.ToString("00") + ":"
-                    + seconds.ToString("00");
+                    + Math.Floor(seconds).ToString("00");
             }
             else
             {
-                string format = "00";
+                string secondsString;
                 if (numDecimals > 0)
                 {
-                    format += "." + new String('0', numDecimals);
+                    // ToString always rounds and we want to truncate, so format with an
+                    // extra decimal place and then lop it off
+                    string format = "00." + new String('0', numDecimals + 1);
+                    secondsString = seconds.ToString(format);
+                    secondsString = secondsString.Substring(0, secondsString.Length - 1);
+                }
+                else
+                {
+                    secondsString = Math.Floor(seconds).ToString("00");
                 }
 
                 return sign + minutes.ToString("#0") + ":"
-                    + seconds.ToString(format);
+                    + secondsString;
             }
         }
 
