@@ -385,5 +385,15 @@ namespace Tac
             versionStyle.wordWrap = false;
             return versionStyle;
         }
+
+        public static float RoundUp(float value, float step)
+        {
+            return Mathf.Ceil(value / step) * step;
+        }
+
+        public static float RoundDown(float value, float step)
+        {
+            return Mathf.Floor(value / step) * step;
+        }
     }
 }
