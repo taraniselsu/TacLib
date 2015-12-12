@@ -255,6 +255,7 @@ namespace Tac
             const double SECONDS_PER_MINUTE = 60.0;
             const double MINUTES_PER_HOUR = 60.0;
             double HOURS_PER_DAY = (GameSettings.KERBIN_TIME) ? 6.0 : 24.0;
+            double DAYS_PER_YEAR = (GameSettings.KERBIN_TIME) ? 426.0 : 365.0;
 
             string sign = "";
             if (value < 0.0)
@@ -274,6 +275,17 @@ namespace Tac
             long days = (long)(hours / HOURS_PER_DAY);
             hours -= (long)(days * HOURS_PER_DAY);
 
+            long years = (long)(days / DAYS_PER_YEAR);
+            days -= (long)(years * DAYS_PER_YEAR);
+
+            if (years > 0)
+            {
+                return sign + years.ToString("#0") + "y "
+                    + days.ToString("##0") + "d "
+                    + hours.ToString("00") + ":"
+                    + minutes.ToString("00") + ":"
+                    + Math.Floor(seconds).ToString("00");
+            }
             if (days > 0)
             {
                 return sign + days.ToString("#0") + "d "
