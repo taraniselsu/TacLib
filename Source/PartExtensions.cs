@@ -64,8 +64,10 @@ namespace Tac
                     return TakeResource_AllVessel(part, resource, demand);
                 case ResourceFlowMode.STACK_PRIORITY_SEARCH:
                     return TakeResource_StackPriority(part, resource, demand);
+                case ResourceFlowMode.STAGE_STACK_FLOW_BALANCE:
+                    return part.RequestResource(resource.id, demand); // for now treat as SPF rather than SPS.
                 case ResourceFlowMode.STAGE_PRIORITY_FLOW:
-                    Debug.LogWarning("Tac.PartExtensions.TakeResource: ResourceFlowMode.STAGE_PRIORITY_FLOW is not supported yet.");
+                    //Debug.LogWarning("Tac.PartExtensions.TakeResource: ResourceFlowMode.STAGE_PRIORITY_FLOW is not supported yet.");
                     return part.RequestResource(resource.id, demand);
                 default:
                     Debug.LogWarning("Tac.PartExtensions.TakeResource: Unknown ResourceFlowMode = " + resource.resourceFlowMode.ToString());
