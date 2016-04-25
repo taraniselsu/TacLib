@@ -45,33 +45,7 @@ namespace Tac
         private GUIContent content;
         private GUIStyle iconStyle;
 
-        private bool visible;
-        public bool Visible
-        {
-            get
-            {
-                return visible;
-            }
-            set
-            {
-                if (value)
-                {
-                    if (!visible)
-                    {
-                        RenderingManager.AddToPostDrawQueue(3, DrawIcon);
-                    }
-                }
-                else
-                {
-                    if (visible)
-                    {
-                        RenderingManager.RemoveFromPostDrawQueue(3, DrawIcon);
-                    }
-                }
-
-                visible = value;
-            }
-        }
+        public bool Visible { get; set; }
 
         public Icon(Rect defaultPosition, string imageFilename, string noImageText, string tooltip, Action onClickHandler, string configNodeName = "Icon")
         {
@@ -91,6 +65,14 @@ namespace Tac
                 content = new GUIContent(noImageText, tooltip);
             }
         }
+		
+		private void OnGUI()
+		{
+			if (this.Visible)
+			{
+                DrawIcon();
+			}
+		}
 
         private void DrawIcon()
         {
